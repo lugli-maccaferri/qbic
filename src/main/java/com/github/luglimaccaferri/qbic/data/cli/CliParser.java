@@ -11,15 +11,33 @@ public class CliParser {
 
     private CliParser(){} // evitiamo che venga istanziata
 
-    public static CliItem<?> arg(String key, CliItem.Type type) {
+    public static CliItem<String> string(String key){
 
-        CliItem<?> value = ( type == CliItem.Type.INT ) ? new CliItem<Integer>() : ( type == CliItem.Type.STRING ) ? new CliItem<String>() : new CliItem<Boolean>();
+        CliItem<String> item = new CliStringItem();
+        item.setKey(key);
 
-        value.setType(type);
-        value.setKey(key);
-        options.put(key, value);
+        options.put(key, item);
+        return item;
 
-        return options.get(key);
+    }
+
+    public static CliItem<Integer> integer(String key){
+
+        CliItem<Integer> item = new CliIntegerItem();
+        item.setKey(key);
+
+        options.put(key, item);
+        return item;
+
+    }
+
+    public static CliItem<Boolean> bool(String key){
+
+        CliItem<Boolean> item = new CliBooleanItem();
+        item.setKey(key);
+
+        options.put(key, item);
+        return item;
 
     }
 
@@ -41,19 +59,21 @@ public class CliParser {
                 String[] split = arg.split("=");
                 String key = split[0], value = split[1];
 
+                System.out.println(key);
+
                 if(options.containsKey(key)) {
 
                     CliItem<?> item = options.get(key);
 
-                    switch (item.getType()) {
-                        case INT -> {
-                            if (!TypeUtils.isInteger(value))
-                                throw new InvalidArgumentException("InvalidArgumentException: args." + key + " must be an int!");
-                            item.setValue(Integer.valueOf(value));
-                        }
-                        case STRING -> item.setValue(value);
-                        case BOOLEAN -> item.setValue(Boolean.parseBoolean(value));
-                        default -> throw new Exception("args." + key + " has no type");
+                    if(item instanceof CliStringItem)
+                        ((CliStringItem) item).setValue(value);
+                    else if(item instanceof CliIntegerItem){
+                        if (!TypeUtils.isInteger(value))
+                            throw new InvalidArgumentException("InvalidArgumentException: args." + key + " must be an int!");
+                        ((CliIntegerItem) item).setValue(Integer.valueOf(value));
+                    }
+                    else if(item instanceof CliBooleanItem){
+                        ((CliBooleanItem) item).setValue(Boolean.parseBoolean(value));
                     }
 
                 }
