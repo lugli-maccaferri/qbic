@@ -5,6 +5,9 @@ public abstract class CliItem<T> {
     protected T value;
     private String key;
 
+    public T value(){
+        return this.value;
+    }
     public abstract CliItem<T> defaultValue(T value);
     public abstract void setValue(T value);
     public void setKey(String key){
@@ -14,7 +17,7 @@ public abstract class CliItem<T> {
     @Override
     public String toString(){
 
-        return "{ " + this.key + ": " + this.value.toString() + " }";
+        return this.value.toString();
 
     }
 

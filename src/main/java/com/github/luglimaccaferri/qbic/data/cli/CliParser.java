@@ -11,6 +11,16 @@ public class CliParser {
 
     private CliParser(){} // evitiamo che venga istanziata
 
+    public static CliItem<Short> u16(String key){
+
+        CliItem<Short> item = new CliShortItem();
+        item.setKey(key);
+
+        options.put(key, item);
+        return item;
+
+    }
+
     public static CliItem<String> string(String key){
 
         CliItem<String> item = new CliStringItem();
@@ -21,7 +31,7 @@ public class CliParser {
 
     }
 
-    public static CliItem<Integer> integer(String key){
+    public static CliItem<Integer> u32(String key){
 
         CliItem<Integer> item = new CliIntegerItem();
         item.setKey(key);
@@ -74,7 +84,8 @@ public class CliParser {
                     }
                     else if(item instanceof CliBooleanItem){
                         ((CliBooleanItem) item).setValue(Boolean.parseBoolean(value));
-                    }
+                    }else if(item instanceof CliShortItem)
+                        ((CliShortItem) item).setValue(Short.valueOf(value));
 
                 }
 
