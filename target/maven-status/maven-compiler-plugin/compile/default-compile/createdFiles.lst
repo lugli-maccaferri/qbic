@@ -1,0 +1,6 @@
+com/github/luglimaccaferri/qbic/http/models/misc/User.class
+com/github/luglimaccaferri/qbic/http/models/misc/Admin.class
+com/github/luglimaccaferri/qbic/http/models/HTTPError.class
+com/github/luglimaccaferri/qbic/http/models/misc/BodyParser.class
+com/github/luglimaccaferri/qbic/http/models/Ok.class
+com/github/luglimaccaferri/qbic/http/controllers/AuthController.class
