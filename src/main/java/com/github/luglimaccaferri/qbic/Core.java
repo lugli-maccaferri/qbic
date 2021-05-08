@@ -3,21 +3,22 @@ package com.github.luglimaccaferri.qbic;
 import com.github.luglimaccaferri.qbic.data.cli.CliItem;
 import com.github.luglimaccaferri.qbic.data.cli.CliParser;
 import com.github.luglimaccaferri.qbic.http.Router;
-import org.json.simple.JSONObject;
+import com.google.gson.Gson;
+
 import static java.lang.System.*;
 
 public class Core {
 
-    private JSONObject config;
     private final Router router;
+    public static Gson gson = new Gson();
 
     public Core(){
 
         out.println("initializing qbic...");
         out.println("config file: " + CliParser.options.get("config").value());
-        CliItem<?> port = CliParser.options.get("port");
+        CliItem<Short> port = (CliItem<Short>) CliParser.options.get("port");
         out.println("http port: " + port.value());
-        this.router = new Router((short) port.value()); // sono sicuro che sia short
+        this.router = new Router(port.value()); // sono sicuro che sia short
 
     }
 

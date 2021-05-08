@@ -1,0 +1,17 @@
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/controllers/AuthController.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/Router.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliStringItem.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliBooleanItem.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/misc/Admin.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliIntegerItem.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliItem.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/HTTPError.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/Qbic.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliParser.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/utils/TypeUtils.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/Core.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliShortItem.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/misc/User.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/misc/BodyParser.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/errors/cli/InvalidArgumentException.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/Ok.java
