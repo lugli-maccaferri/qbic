@@ -4,4 +4,5 @@ com\github\luglimaccaferri\qbic\http\controllers\AuthController.class
 com\github\luglimaccaferri\qbic\http\models\misc\Admin.class
 com\github\luglimaccaferri\qbic\http\models\Ok.class
 com\github\luglimaccaferri\qbic\http\models\misc\User.class
+com\github\luglimaccaferri\qbic\http\models\ProtectedRoute.class
 com\github\luglimaccaferri\qbic\http\models\JSONResponse.class

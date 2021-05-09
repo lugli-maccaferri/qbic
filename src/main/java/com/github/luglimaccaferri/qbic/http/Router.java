@@ -1,12 +1,13 @@
 package com.github.luglimaccaferri.qbic.http;
 
 import com.github.luglimaccaferri.qbic.http.controllers.AuthController;
+import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 import com.github.luglimaccaferri.qbic.http.models.misc.BodyParser;
-import com.google.gson.stream.MalformedJsonException;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
+import static com.github.luglimaccaferri.qbic.http.models.ProtectedRoute.route;
 import static spark.Spark.*;
 
 public class Router {
@@ -40,27 +41,28 @@ public class Router {
             * */
 
             // req.attribute("body", Core.gson.toJson(req.body())); // body in json
-            try{
-                if(req.requestMethod().equals("POST") &&
-                        (this.acceptedContentTypes[0].equals(contentType) || this.acceptedContentTypes[1].equals(contentType)) // O(1) gang lmaooo
-                ) req.attribute("parsed_body", new BodyParser(req));
-            }catch (MalformedJsonException ex){
-                halt(400, "bad request");
-            }
-
+            if(req.requestMethod().equals("POST") &&
+                    (this.acceptedContentTypes[0].equals(contentType) || this.acceptedContentTypes[1].equals(contentType)) // O(1) gang lmaooo
+            ) req.attribute("parsed_body", new BodyParser(req));
 
         });
+
         after((req, res) -> res.type("application/json"));
 
         // root paths
 
         get("/", (req, res) -> { return Ok.SUCCESS; });
-        get("/auth", AuthController.index); // passa direttamente il body della lambda indicata
+        route(true).get("/auth", AuthController.index); // passa direttamente il body della lambda indicata
 
         // derived paths
 
         path("/auth", () -> {
             post("/login", AuthController.login);
+        });
+
+        exception(HTTPError.class, (e, req, res) -> {
+            res.status(e.getErrorCode());
+            res.body(e.print());
         });
 
     }

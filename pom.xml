@@ -36,6 +36,11 @@
             <artifactId>jasync-mysql</artifactId>
             <version>1.1.6</version>
         </dependency>
+        <dependency>
+            <groupId>xyz.luan.spark.decorator</groupId>
+            <artifactId>spark-decorator</artifactId>
+            <version>0.2.0</version>
+        </dependency>
     </dependencies>
 
     <properties>
