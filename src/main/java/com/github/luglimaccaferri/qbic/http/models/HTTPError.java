@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import spark.Response;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class HTTPError extends Exception implements JSONResponse{
 
@@ -23,9 +24,6 @@ public class HTTPError extends Exception implements JSONResponse{
     public static final HTTPError BAD_REQUEST = new HTTPError("bad_request", 400);
     public static final HTTPError INVALID_CREDENTIALS = new HTTPError("invalid_credentials", 401);
 
-    public HTTPError addList(List<String> list){
-
-    }
     public String toResponse(Response response){
         response.status(this.errorCode);
         return new Gson().toJson(this.response);

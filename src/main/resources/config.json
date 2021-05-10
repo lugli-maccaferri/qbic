@@ -1,0 +1,9 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "username": "qbic_user",
+    "password": "qbic_pass",
+    "database": "qbic",
+    "port": 3306
+  }
+}

@@ -4,37 +4,18 @@ import com.github.luglimaccaferri.qbic.http.Router;
 
 public class Qbic{
 
-    /*public static void init(String... args){
-
-        try{
-
-            CliParser.fromArgs(args);
-
-            router = new Router((short) 3000);
-            router.init();
-
-        }catch(Exception err){
-
-            err.printStackTrace();
-
-        }
-
-    }*/
-
     public static void main(String... args) {
 
         // java -jar qbic.jar --parametro=valore
         CliParser
                 .string("config")
                 .defaultValue("./config.json");
-
+        CliParser
+                .string("root-user")
+                .defaultValue("root");
         CliParser
                 .u16("port")
-                .defaultValue((short) 3000);
-
-        CliParser
-                .bool("debug")
-                .defaultValue(false);
+                .defaultValue((short) 3001);
 
         try{
 
