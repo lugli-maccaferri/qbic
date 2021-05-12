@@ -4,13 +4,17 @@ import com.github.luglimaccaferri.qbic.data.cli.CliParser;
 import com.github.luglimaccaferri.qbic.data.cli.CliShortItem;
 import com.github.luglimaccaferri.qbic.data.mysql.Connector;
 import com.github.luglimaccaferri.qbic.http.Router;
+import com.github.luglimaccaferri.qbic.http.models.misc.User;
 import com.github.luglimaccaferri.qbic.utils.RandomString;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.log.Logger;
 
 import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static java.lang.System.*;
 
@@ -19,6 +23,7 @@ public class Core {
     private final Router router;
     private static JsonObject config;
     private static Connector mysqlConnector = null;
+    public static final Logger logger = Log.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
     public Core(){
 
@@ -31,7 +36,6 @@ public class Core {
     }
 
     public static JsonObject getConfig(){ return config; }
-    public static Connector mysql(){ return mysqlConnector; }
 
     public void init(){
 
@@ -46,13 +50,21 @@ public class Core {
 
             String rootUser = (String) CliParser.options.get("root-user").value();
             if(rootUser != null){
-                // System.out.println(RandomString.generateAlphanumeric(16));
+
+                //User.create(rootUser, RandomString.generateAlphanumeric(16), true);
+                System.out.println(
+                        String.format(
+                                "generated root user () with UUID %s"
+                        , UUID.randomUUID().toString())
+                );
+
             }
             this.router.ignite();
 
         }catch(Exception e){
 
-            Router.logger.warn("startup error");
+            logger.warn("startup error");
+            Connector.connection.disconnect();
             this.router.kill();
             e.printStackTrace();
 

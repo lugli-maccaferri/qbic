@@ -12,11 +12,7 @@ import static spark.Spark.*;
 
 public class Router {
 
-    // private final String[] acceptedContentTypes = { "application/json", "application/x-www-form-urlencoded" };
-    public static final Logger logger = Log.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-
     public Router(short port){ port(port); }
-
     public void kill(){ stop(); }
 
     public void ignite(){
@@ -29,22 +25,16 @@ public class Router {
             String requestMethod = req.requestMethod();
             String url = req.url();
 
-            logger.info(requestMethod + " " + url);
-            logger.info(contentType);
-
-            /*
-            *
-            * Content-Type per le richieste (non di upload file) accettati:
-            * - application/json
-            * - application/x-www-form-urlencoded
-            *
-            * */
+            Core.logger.info(requestMethod + " " + url);
+            Core.logger.info(contentType);
 
         });
 
         // root paths
 
-        get("/", (req, res) -> { return Ok.SUCCESS; });
+        get("/", (req, res) -> {
+            return Ok.SUCCESS.toResponse(res);
+        });
         route(true).get("/auth", AuthController.index); // passa direttamente il body della lambda indicata
 
         // derived paths
