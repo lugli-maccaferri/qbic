@@ -1,5 +1,6 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
 
+import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 import com.github.luglimaccaferri.qbic.http.models.misc.User;
@@ -13,14 +14,16 @@ public class AuthController {
 
     };
 
-    public static Route login = (req, res) -> {
+    public static Route publicKey = (req, res) -> {
 
-        String username = req.queryParams("username"),
-                password = req.queryParams("password");
+        String public_key = req.queryParams("public-key");
 
-        User user = User.from(username);
-        if(user == null) return HTTPError.INVALID_CREDENTIALS.toResponse(res);
-        if(!user.verifyPassword(password)) return HTTPError.INVALID_CREDENTIALS.toResponse(res);
+        /*System.out.println(req.headers("Host"));
+        if(req.ip().compareToIgnoreCase(Core.getConfig().get("parent").getAsString()) != 0)
+            return HTTPError.FORBIDDEN.toResponse(res);*/
+
+        Core.logger.warn("updating public key!");
+        Core.updatePublicKey(public_key);
 
         return new Ok().toResponse(res);
 

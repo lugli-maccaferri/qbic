@@ -23,6 +23,7 @@ public class HTTPError extends Exception implements JSONResponse{
 
     public static final HTTPError BAD_REQUEST = new HTTPError("bad_request", 400);
     public static final HTTPError INVALID_CREDENTIALS = new HTTPError("invalid_credentials", 401);
+    public static final HTTPError FORBIDDEN = new HTTPError("forbidden", 403);
 
     public String toResponse(Response response){
         response.status(this.errorCode);

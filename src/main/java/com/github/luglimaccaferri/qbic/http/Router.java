@@ -4,8 +4,6 @@ import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.controllers.AuthController;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
 
 import static com.github.luglimaccaferri.qbic.http.models.ProtectedRoute.route;
 import static spark.Spark.*;
@@ -25,8 +23,8 @@ public class Router {
             String requestMethod = req.requestMethod();
             String url = req.url();
 
-            Core.logger.info(requestMethod + " " + url);
-            Core.logger.info(contentType);
+            Core.logger.warn(requestMethod + " " + url);
+            Core.logger.warn(contentType);
 
         });
 
@@ -40,7 +38,7 @@ public class Router {
         // derived paths
 
         path("/auth", () -> {
-            route(new String[]{"username", "password"}).post("/login", AuthController.login);
+            post("/public-key", AuthController.publicKey);
         });
 
         exception(HTTPError.class, (e, req, res) -> {

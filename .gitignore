@@ -1,5 +1,4 @@
 target/*
-config.json
 deploy.sh
 
 # Compiled class file
