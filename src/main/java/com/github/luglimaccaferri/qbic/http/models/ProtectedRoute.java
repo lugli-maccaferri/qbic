@@ -1,5 +1,9 @@
 package com.github.luglimaccaferri.qbic.http.models;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.github.luglimaccaferri.qbic.data.models.misc.User;
+import com.github.luglimaccaferri.qbic.http.Router;
+import com.github.luglimaccaferri.qbic.utils.Security;
 import spark.Route;
 import xyz.luan.spark.decorator.RouteDecorator;
 
@@ -8,8 +12,7 @@ import java.util.Arrays;
 
 public class ProtectedRoute extends RouteDecorator {
 
-    private boolean requiresAuth;
-    // private HashMap<String, Boolean> requiredParams = new HashMap<String, Boolean>();
+    private final boolean requiresAuth;
     private String[] requiredParams = {};
 
     public static ProtectedRoute route(String[] requiredParams, boolean requiresAuth){ return new ProtectedRoute(requiredParams, requiresAuth); }
@@ -39,8 +42,15 @@ public class ProtectedRoute extends RouteDecorator {
         return (req, res) -> {
 
             if(this.requiresAuth){
+
                 String authHeader = req.headers("authorization");
                 if(authHeader == null) throw HTTPError.INVALID_CREDENTIALS;
+
+                String token = authHeader.split("Bearer ")[1];
+                DecodedJWT verified_token = Security.verifyJWT(token);
+                req.attribute("jwt", verified_token.getClaims());
+                req.attribute("user", User.fromJWT(verified_token));
+
             }
 
             if(req.requestMethod().equals("POST") &&  this.requiredParams.length > 0){
@@ -57,11 +67,10 @@ public class ProtectedRoute extends RouteDecorator {
 
             }
 
-            // dummy middleware (da ampliare)
-            // ritorno null perché è un middleware, non devo modificare il flow della navigazione
-
             return null;
+
         };
+
     }
 
 }

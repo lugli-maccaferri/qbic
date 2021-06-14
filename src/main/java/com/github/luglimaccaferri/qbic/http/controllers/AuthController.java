@@ -1,16 +1,21 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.github.luglimaccaferri.qbic.Core;
-import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
-import com.github.luglimaccaferri.qbic.http.models.misc.User;
 import spark.Route;
+
+import java.util.Map;
 
 public class AuthController {
 
     public static Route index = (req, res) -> {
 
-        return new Ok().put("message", "/auth endpoint").toResponse(res);
+        Map<String, Claim> jwt = req.attribute("jwt");
+
+        return new Ok()
+                .put("user", jwt)
+                .toResponse(res);
 
     };
 
@@ -18,9 +23,7 @@ public class AuthController {
 
         String public_key = req.queryParams("public-key");
 
-        /*System.out.println(req.headers("Host"));
-        if(req.ip().compareToIgnoreCase(Core.getConfig().get("parent").getAsString()) != 0)
-            return HTTPError.FORBIDDEN.toResponse(res);*/
+        // trovare un modo decente per verificare la veridicità dell'authserver
 
         Core.logger.warn("updating public key!");
         Core.updatePublicKey(public_key);

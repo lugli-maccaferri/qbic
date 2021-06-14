@@ -2,6 +2,7 @@ package com.github.luglimaccaferri.qbic.http;
 
 import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.controllers.AuthController;
+import com.github.luglimaccaferri.qbic.http.controllers.ServerController;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 
@@ -39,6 +40,13 @@ public class Router {
 
         path("/auth", () -> {
             post("/public-key", AuthController.publicKey);
+        });
+
+        path("/server", () -> {
+            before(
+                    (req, res) -> route(true)
+            );
+            route(new String[]{"name"}).post("/create", ServerController.create);
         });
 
         exception(HTTPError.class, (e, req, res) -> {

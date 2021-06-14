@@ -1,5 +1,4 @@
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/controllers/AuthController.java
-/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/mysql/Connector.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/Router.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliStringItem.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliBooleanItem.java
@@ -8,6 +7,7 @@
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliIntegerItem.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/data/cli/CliItem.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/HTTPError.java
+/home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/utils/Security.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/utils/Auth.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/Qbic.java
 /home/macca/idea/qbic/src/main/java/com/github/luglimaccaferri/qbic/http/models/ProtectedRoute.java

@@ -1,5 +1,15 @@
 package com.github.luglimaccaferri.qbic.utils;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.github.luglimaccaferri.qbic.Core;
+import com.github.luglimaccaferri.qbic.http.models.HTTPError;
+
+import java.security.interfaces.RSAPublicKey;
+
 public class Security {
     public static String bytesToHex(byte[] bytes){
         // lenta, ma tanto ci interessa solo una volta ogni tanto
@@ -26,4 +36,21 @@ public class Security {
         return data;
 
     }
+
+    public static DecodedJWT verifyJWT(String token) throws HTTPError {
+
+        try{
+
+            return Core.getVerifier().verify(token);
+
+        }catch(JWTVerificationException e){
+
+            // debug
+            e.printStackTrace();
+            throw HTTPError.FORBIDDEN;
+
+        }
+
+    }
+
 }
