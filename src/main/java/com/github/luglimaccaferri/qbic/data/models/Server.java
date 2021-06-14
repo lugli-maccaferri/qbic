@@ -1,10 +1,18 @@
 package com.github.luglimaccaferri.qbic.data.models;
 
 import com.github.luglimaccaferri.qbic.Core;
+import com.github.luglimaccaferri.qbic.data.models.sqlite.Sqlite;
+import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 
 public class Server {
 
@@ -12,6 +20,8 @@ public class Server {
     private final String id;
     private final String name;
     private final String owner;
+
+
     private enum STATUS {
       CREATED;
     };
@@ -29,6 +39,38 @@ public class Server {
     public String getJar() { return jar_path; }
     public String getName() { return name; }
     public String getOwner() { return owner; }
+    public HashMap<String, String> toMap(){
+
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put("id", getId());
+        map.put("name", getName());
+        map.put("owner", getOwner());
+
+        return map;
+
+    }
+
+    public void create() throws SQLException, HTTPError {
+
+        Connection conn = Sqlite.getConnection();
+
+        try{
+
+            PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?)");
+            s.setString(1, getId()); s.setString(2, getName()); s.setString(3, getJar()); s.setString(4, getOwner());
+            s.execute();
+            createFs();
+            conn.commit();
+
+        }catch(Exception e){
+
+            e.printStackTrace();
+            conn.rollback();
+            throw HTTPError.GENERIC_ERROR;
+
+        }
+
+    }
 
     public void createFs() throws IOException {
 

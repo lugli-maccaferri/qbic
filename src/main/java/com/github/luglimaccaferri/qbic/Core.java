@@ -82,6 +82,8 @@ public class Core {
 
             // directory chiave pubblica/privata
             Files.createDirectories(Path.of(KEYS_PATH)); // createDirectories non throwa niente se la directory esiste già
+            // directory server
+            Files.createDirectories(Path.of(SERVERS_PATH));
 
             if(!Files.exists(Path.of(CONFIG_PATH)))
                 Files.copy(

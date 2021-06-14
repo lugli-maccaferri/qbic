@@ -13,7 +13,8 @@ public class Sqlite {
 
     private Sqlite(){}
 
-    public static Connection getConnection(){ return connection; }
+    public static Connection getConnection(){ return connection; } // meglio condividere una connessione a sqlite per tutti i thread
+    // tanto sqlite usa i lock a livello di fs, quindi in ogni caso fare tante connessioni non cambierebbe nulla
 
     public static void init() throws SQLException {
 
@@ -21,6 +22,7 @@ public class Sqlite {
 
         String url = String.format("jdbc:sqlite:%s", Core.SQLITE_PATH);
         connection = DriverManager.getConnection(url);
+        connection.setAutoCommit(false);
         initialized = true;
 
     }

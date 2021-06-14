@@ -19,6 +19,12 @@ public class User {
         this.permissions.put("edit_others", permissions.get("edit_others"));
     }
 
+    public String getUsername() { return username; }
+
+    public HashMap<String, Byte> getPermissions() { return permissions; }
+
+    public UUID getUUID() { return uuid; }
+
     public static User fromJWT(DecodedJWT jwt){
         HashMap<String, Byte> permissions = new HashMap<String, Byte>();
 
@@ -28,7 +34,7 @@ public class User {
 
         return new User(
                 jwt.getClaim("username").asString(),
-                UUID.fromString(jwt.getClaim("uuid").asString()),
+                UUID.fromString(jwt.getClaim("user_id").asString()),
                 permissions
         );
     }

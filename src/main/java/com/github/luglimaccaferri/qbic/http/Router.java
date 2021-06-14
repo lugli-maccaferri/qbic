@@ -46,7 +46,7 @@ public class Router {
             before(
                     (req, res) -> route(true)
             );
-            route(new String[]{"name"}).post("/create", ServerController.create);
+            route(new String[]{"name"}, true).post("/create", ServerController.create);
         });
 
         exception(HTTPError.class, (e, req, res) -> {
