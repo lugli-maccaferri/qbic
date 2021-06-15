@@ -14,7 +14,7 @@ public class User {
     public User(String username, UUID uuid, HashMap<String, Byte> permissions){
         this.uuid = uuid;
         this.username = username;
-        this.permissions.put("admin", permissions.get("is_admin"));
+        this.permissions.put("admin", permissions.get("admin"));
         this.permissions.put("edit_fs", permissions.get("edit_fs"));
         this.permissions.put("edit_others", permissions.get("edit_others"));
     }
@@ -32,6 +32,8 @@ public class User {
         permissions.put("edit_fs", Byte.valueOf(jwt.getClaim("edit_fs").asString()));
         permissions.put("edit_others", Byte.valueOf(jwt.getClaim("edit_others").asString()));
 
+        System.out.println(permissions);
+
         return new User(
                 jwt.getClaim("username").asString(),
                 UUID.fromString(jwt.getClaim("user_id").asString()),
@@ -42,9 +44,7 @@ public class User {
     public boolean canEditFs(){
         return this.permissions.get("edit_fs") > 0;
     }
-    public boolean isAdmin(){
-        return this.permissions.get("admin") > 0;
-    }
+    public boolean isAdmin(){ return this.permissions.get("admin") > 0; }
     public boolean canEditOthers(){
         return this.permissions.get("edit_others") > 0;
     }

@@ -1,5 +1,6 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
 
+import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import com.github.luglimaccaferri.qbic.data.models.misc.User;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
@@ -26,6 +27,21 @@ public class ServerController {
         server.create();
 
         return Ok.SUCCESS.put("server", server.toMap()).toResponse(res);
+
+    };
+
+    public static Route start = (req, res) -> {
+
+        String server_id = req.params(":id");
+        Server server = Core.getCreatedServers().get(server_id);
+        User user = req.attribute("user");
+
+        if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+        if(!(user.isAdmin() || user.getUUID().toString().equals(server.getOwner()))) return HTTPError.UNAUTHORIZED.toResponse(res);
+
+        server.start(); // ciao vai su un altro thread
+
+        return Ok.SUCCESS.toResponse(res); // ritorna success: true indipendentemente da quello che accade al server, dato che questo rappresenta lo stato della richiesta, piuttosto che quello del server!
 
     };
 

@@ -7,13 +7,16 @@ import com.github.luglimaccaferri.qbic.data.cli.CliParser;
 import com.github.luglimaccaferri.qbic.data.cli.CliShortItem;
 import com.github.luglimaccaferri.qbic.data.models.sqlite.Sqlite;
 import com.github.luglimaccaferri.qbic.http.Router;
+import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.utils.Security;
+import com.github.luglimaccaferri.qbic.utils.TypeUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import okhttp3.OkHttpClient;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
+import sun.misc.SignalHandler;
 
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -24,6 +27,10 @@ import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +68,10 @@ public class Core {
     public static JsonObject getConfig(){ return config; }
     public static OkHttpClient getHttpClient() { return httpClient; }
     public static JWTVerifier getVerifier(){ return verifier; }
+    public static HashMap<String, Server> getCreatedServers(){ return created_servers; }
 
-    public static void addCreatedServer(Server srv){ created_servers.put(srv.getId(), srv); }
+
+    public static void addCreatedServer(Server srv){ created_servers.put(srv.getServerId(), srv); }
 
     public static void updatePublicKey(String pk) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -83,6 +92,7 @@ public class Core {
 
         try{
 
+            addShutdownHook();
             // directory chiave pubblica/privata
             Files.createDirectories(Path.of(KEYS_PATH)); // createDirectories non throwa niente se la directory esiste già
             // directory server
@@ -109,6 +119,9 @@ public class Core {
 
             Sqlite.init();
             // todo: Migration.createTable("tabella", {"riga1", "riga2"});
+            System.out.println("loading servers...");
+            loadServers();
+            System.out.printf("%d server(s) loaded!%n", created_servers.size());
 
             this.router.ignite();
             this.initialized = true;
@@ -128,6 +141,41 @@ public class Core {
         byte[] publicKey = Files.readAllBytes(Path.of(KEYS_PATH + "/parent.key"));
         X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKey);
         return KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
+
+    private static void loadServers() throws SQLException {
+
+
+        Connection conn = Sqlite.getConnection();
+        PreparedStatement s = conn.prepareStatement("SELECT * FROM servers");
+        ResultSet set = s.executeQuery();
+
+        while(set.next()){
+
+            String id = set.getString("id"),
+                   name = set.getString("name"),
+                   jar_path = set.getString("jar_path"),
+                   owner = set.getString("owner");
+
+            created_servers.put(id, new Server(
+                    id, name, jar_path, owner
+            ));
+
+        }
+
+    }
+
+    private void addShutdownHook(){
+
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            public void run(){
+
+                System.out.println("qbic quitting...");
+                // fare graceful shutdown qua
+
+            }
+        });
+
     }
 
 }

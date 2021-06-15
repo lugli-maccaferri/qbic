@@ -47,6 +47,7 @@ public class Router {
                     (req, res) -> route(true)
             );
             route(new String[]{"name"}, true).post("/create", ServerController.create);
+            route(true).post("/start/:id", ServerController.start);
         });
 
         exception(HTTPError.class, (e, req, res) -> {

@@ -26,6 +26,8 @@ public class HTTPError extends Exception implements JSONResponse{
     public static final HTTPError FORBIDDEN = new HTTPError("forbidden", 403);
     public static final HTTPError GENERIC_ERROR = new HTTPError("generic_error", 500);
     public static final HTTPError EXPIRED_CREDENTIALS = new HTTPError("expired_credentials", 401);
+    public static final HTTPError UNAUTHORIZED = new HTTPError("unauthorized", 401);
+    public static final HTTPError SERVER_NOT_FOUND = new HTTPError("server_not_found", 404);
 
     public String toResponse(Response response){
         response.status(this.errorCode);

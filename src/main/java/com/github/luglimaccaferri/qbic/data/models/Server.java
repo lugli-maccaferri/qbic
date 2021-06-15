@@ -12,9 +12,7 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,7 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public class Server {
+public class Server extends Thread {
 
     private final String jar_path;
     private final String id;
@@ -34,9 +32,20 @@ public class Server {
     private final String owner;
     private final String main_path;
     private static final String DEFAULT_PATH = "https://static.macca.cloud/qbic/jars/spigot.jar";
+    private ProcessBuilder process_builder;
+    private Process process;
+    private BufferedReader reader;
+    private BufferedWriter writer;
+
     private enum Status {
         BORN,
-        CREATED
+        CREATED,
+        TO_INIT,
+        SHUTTING_DOWN,
+        STOPPED,
+        STARTING_UP,
+        RUNNING,
+        UNKNOWN
     };
     private Status status;
 
@@ -51,18 +60,61 @@ public class Server {
         this.main_path = String.format("%s/%s", Core.SERVERS_PATH, this.id);
         this.status = Status.BORN;
 
+        // aggiungere parametri opzionali (xmx, xms, port)
+
     }
 
     public Status getStatus(){ return status; }
-    public String getId() { return id; }
+    public String getServerId() { return id; }
     public String getJar() { return jar_path; }
-    public String getName() { return name; }
+    public String getServerName() { return name; }
     public String getOwner() { return owner; }
+
+    @Override
+    public void run() {
+
+        try {
+            this.startServer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private synchronized void startServer() throws IOException {
+
+        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP)
+            return;
+
+        this.status = Status.STARTING_UP;
+        System.out.printf("starting %s%n", this.name);
+
+        this.process_builder = new ProcessBuilder("java", "-Xmx1G", "-Xms1G", "-jar", "server.jar", "nogui");
+        this.process_builder.redirectErrorStream(true);
+        this.process_builder.directory(Path.of(this.main_path).toFile());
+
+        this.process = this.process_builder.start();
+        this.reader = new BufferedReader(
+                new InputStreamReader(
+                        this.process.getInputStream()
+                )
+        );
+        System.out.printf("started server %s (pid: %d)%n", this.name, this.process.pid());
+        String line;
+
+        while((line = this.reader.readLine()) != null){
+
+            System.out.println(line);
+
+        }
+
+    }
+
     public HashMap<String, String> toMap(){
 
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put("id", getId());
-        map.put("name", getName());
+        map.put("id", getServerId());
+        map.put("name", getServerName());
         map.put("owner", getOwner());
 
         return map;
@@ -76,7 +128,7 @@ public class Server {
         try{
 
             PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?)");
-            s.setString(1, getId()); s.setString(2, getName()); s.setString(3, getJar()); s.setString(4, getOwner());
+            s.setString(1, getServerId()); s.setString(2, getServerName()); s.setString(3, getJar()); s.setString(4, getOwner());
             s.execute();
             createFs();
 
@@ -87,6 +139,7 @@ public class Server {
 
             conn.commit();
             this.status = Status.CREATED;
+            Core.addCreatedServer(this);
 
         }catch(Exception e){
 
@@ -163,8 +216,6 @@ public class Server {
         Files.createDirectory(Path.of(main_path));
         Files.createFile(Path.of(main_path + "/eula.txt"));
         Files.writeString(Path.of((main_path + "/eula.txt")), "eula=true");
-
-        Core.addCreatedServer(this);
 
     }
 
