@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
@@ -47,6 +48,9 @@ public class Security {
 
             // debug
             e.printStackTrace();
+            if(e instanceof TokenExpiredException)
+                throw HTTPError.EXPIRED_CREDENTIALS;
+
             throw HTTPError.FORBIDDEN;
 
         }

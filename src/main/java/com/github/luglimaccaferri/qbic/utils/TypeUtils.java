@@ -6,11 +6,31 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 public class TypeUtils {
 
     private TypeUtils(){}
+
+    public static boolean isUrl(String url) throws MalformedURLException {
+
+        try{
+
+            URL u = new URL(url);
+            u.toURI();
+
+            return true;
+
+        }catch(MalformedURLException | URISyntaxException e){
+
+            return false;
+
+        }
+
+    }
 
     public static JsonObject serializeMap(Map<?, ?> value){
         JsonObject obj = new JsonObject();

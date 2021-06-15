@@ -11,12 +11,13 @@ import com.github.luglimaccaferri.qbic.utils.Security;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.github.luglimaccaferri.qbic.data.models.Server;
+import okhttp3.OkHttpClient;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
+
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
@@ -25,12 +26,13 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class Core {
 
     private final Router router;
     private static JsonObject config;
-    private final static HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
+    private final static OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build();
     public static final Logger logger = Log.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     private boolean initialized = false;
 
@@ -38,6 +40,7 @@ public class Core {
     public static final String KEYS_PATH = System.getProperty("user.dir") + "/keys";
     public static final String SQLITE_PATH = System.getProperty("user.dir") + "/qbic.db";
     public static final String SERVERS_PATH = System.getProperty("user.dir") + "/srv";
+    public static final String JARS_PATH = System.getProperty("user.dir") + "/jars";
     private static PublicKey PARENT_KEY;
     private static JWTVerifier verifier;
     private static Sqlite sqlite;
@@ -56,7 +59,7 @@ public class Core {
     public static String getKeysPath(){ return KEYS_PATH; }
     public static PublicKey getParentKey(){ return PARENT_KEY; }
     public static JsonObject getConfig(){ return config; }
-    public static HttpClient getHttpClient() { return httpClient; }
+    public static OkHttpClient getHttpClient() { return httpClient; }
     public static JWTVerifier getVerifier(){ return verifier; }
 
     public static void addCreatedServer(Server srv){ created_servers.put(srv.getId(), srv); }
@@ -84,6 +87,8 @@ public class Core {
             Files.createDirectories(Path.of(KEYS_PATH)); // createDirectories non throwa niente se la directory esiste già
             // directory server
             Files.createDirectories(Path.of(SERVERS_PATH));
+            // directory jar
+            Files.createDirectories(Path.of(JARS_PATH));
 
             if(!Files.exists(Path.of(CONFIG_PATH)))
                 Files.copy(

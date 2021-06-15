@@ -15,7 +15,6 @@ public class ServerController {
         String jar_path = req.queryParams("jar_path");
 
         if(!user.canEditFs()) return HTTPError.FORBIDDEN;
-        if(jar_path == null) jar_path = "spigot.jar"; // da cambiare, testing
 
         Server server = new Server(
                 RandomString.generateAlphanumeric(32),
