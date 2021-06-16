@@ -7,17 +7,14 @@ import com.github.luglimaccaferri.qbic.data.cli.CliParser;
 import com.github.luglimaccaferri.qbic.data.cli.CliShortItem;
 import com.github.luglimaccaferri.qbic.data.models.sqlite.Sqlite;
 import com.github.luglimaccaferri.qbic.http.Router;
-import com.github.luglimaccaferri.qbic.http.models.HTTPError;
+import com.github.luglimaccaferri.qbic.utils.Migration;
 import com.github.luglimaccaferri.qbic.utils.Security;
-import com.github.luglimaccaferri.qbic.utils.TypeUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import okhttp3.OkHttpClient;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import sun.misc.SignalHandler;
-
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -42,7 +39,6 @@ public class Core {
     private final static OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build();
     public static final Logger logger = Log.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     private boolean initialized = false;
-
     public static final String CONFIG_PATH = System.getProperty("user.dir") + "/" + (String) CliParser.options.get("config").value();
     public static final String KEYS_PATH = System.getProperty("user.dir") + "/keys";
     public static final String SQLITE_PATH = System.getProperty("user.dir") + "/qbic.db";
@@ -50,8 +46,8 @@ public class Core {
     public static final String JARS_PATH = System.getProperty("user.dir") + "/jars";
     private static PublicKey PARENT_KEY;
     private static JWTVerifier verifier;
-    private static Sqlite sqlite;
     private static final HashMap<String, Server> created_servers = new HashMap<String, Server>();
+    private static final HashMap<String, Server> started_servers = new HashMap<String, Server>();
 
     public Core(){
 
@@ -69,9 +65,21 @@ public class Core {
     public static OkHttpClient getHttpClient() { return httpClient; }
     public static JWTVerifier getVerifier(){ return verifier; }
     public static HashMap<String, Server> getCreatedServers(){ return created_servers; }
+    public static HashMap<String, Server> getStartedServers(){ return started_servers; }
 
 
-    public static void addCreatedServer(Server srv){ created_servers.put(srv.getServerId(), srv); }
+    public static void addStartedServer(Server srv){
+
+        created_servers.remove(srv.getServerId());
+        started_servers.put(srv.getServerId(), srv);
+
+    }
+    public static void addCreatedServer(Server srv){
+
+        started_servers.remove(srv.getServerId());
+        created_servers.put(srv.getServerId(), srv);
+
+    }
 
     public static void updatePublicKey(String pk) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -118,7 +126,8 @@ public class Core {
             if(!Files.exists(Path.of(SQLITE_PATH))) Files.createFile(Path.of(SQLITE_PATH));
 
             Sqlite.init();
-            // todo: Migration.createTable("tabella", {"riga1", "riga2"});
+            migrate();
+
             System.out.println("loading servers...");
             loadServers();
             System.out.printf("%d server(s) loaded!%n", created_servers.size());
@@ -150,12 +159,12 @@ public class Core {
         PreparedStatement s = conn.prepareStatement("SELECT * FROM servers");
         ResultSet set = s.executeQuery();
 
-        while(set.next()){
+        while (set.next()) {
 
             String id = set.getString("id"),
-                   name = set.getString("name"),
-                   jar_path = set.getString("jar_path"),
-                   owner = set.getString("owner");
+                    name = set.getString("name"),
+                    jar_path = set.getString("jar_path"),
+                    owner = set.getString("owner");
 
             created_servers.put(id, new Server(
                     id, name, jar_path, owner
@@ -173,7 +182,19 @@ public class Core {
                 System.out.println("qbic quitting...");
                 // fare graceful shutdown qua
 
+
             }
+        });
+
+    }
+
+    private void migrate() throws SQLException {
+
+        Migration.createTable("servers", new String[]{
+                "id varchar(32) not null primary key,",
+                "name varchar(255) not null,",
+                "jar_path varchar(1000) not null,",
+                "owner varchar(36) not null"
         });
 
     }

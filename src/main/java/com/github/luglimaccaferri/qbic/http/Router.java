@@ -32,7 +32,7 @@ public class Router {
         // root paths
 
         get("/", (req, res) -> {
-            return Ok.SUCCESS.toResponse(res);
+            return Ok.SUCCESS.put("message", "ciaooooooo").toResponse(res);
         });
         route(true).get("/auth", AuthController.index); // passa direttamente il body della lambda indicata
 

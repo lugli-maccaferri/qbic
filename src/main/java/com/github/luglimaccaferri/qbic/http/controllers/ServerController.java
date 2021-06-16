@@ -15,7 +15,7 @@ public class ServerController {
         User user = req.attribute("user");
         String jar_path = req.queryParams("jar_path");
 
-        if(!user.canEditFs()) return HTTPError.FORBIDDEN;
+        if(!(user.canEditFs() || user.isAdmin())) return HTTPError.FORBIDDEN;
 
         Server server = new Server(
                 RandomString.generateAlphanumeric(32),

@@ -99,14 +99,13 @@ public class Server extends Thread {
                         this.process.getInputStream()
                 )
         );
+
+        this.status = Status.RUNNING;
+        Core.addStartedServer(this);
         System.out.printf("started server %s (pid: %d)%n", this.name, this.process.pid());
         String line;
 
-        while((line = this.reader.readLine()) != null){
-
-            System.out.println(line);
-
-        }
+        while((line = this.reader.readLine()) != null) System.out.println(line);
 
     }
 
