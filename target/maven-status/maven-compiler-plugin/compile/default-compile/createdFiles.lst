@@ -2,8 +2,8 @@ com/github/luglimaccaferri/qbic/http/models/ProtectedRoute.class
 com/github/luglimaccaferri/qbic/utils/Migration.class
 com/github/luglimaccaferri/qbic/data/cli/CliShortItem.class
 com/github/luglimaccaferri/qbic/errors/cli/InvalidArgumentException.class
-com/github/luglimaccaferri/qbic/http/controllers/AuthController.class
 com/github/luglimaccaferri/qbic/http/models/Ok.class
+com/github/luglimaccaferri/qbic/http/controllers/AuthController.class
 com/github/luglimaccaferri/qbic/data/models/Server$Status.class
 com/github/luglimaccaferri/qbic/utils/RandomString.class
 com/github/luglimaccaferri/qbic/Core.class
@@ -16,10 +16,11 @@ com/github/luglimaccaferri/qbic/http/models/JSONResponse.class
 com/github/luglimaccaferri/qbic/http/models/HTTPError.class
 com/github/luglimaccaferri/qbic/Core$1.class
 com/github/luglimaccaferri/qbic/data/cli/CliStringItem.class
-com/github/luglimaccaferri/qbic/data/cli/CliItem.class
 com/github/luglimaccaferri/qbic/http/Router.class
+com/github/luglimaccaferri/qbic/data/cli/CliItem.class
 com/github/luglimaccaferri/qbic/utils/TypeUtils.class
 com/github/luglimaccaferri/qbic/data/cli/CliParser.class
 com/github/luglimaccaferri/qbic/data/models/sqlite/Sqlite.class
 com/github/luglimaccaferri/qbic/utils/Security.class
 com/github/luglimaccaferri/qbic/Qbic.class
+com/github/luglimaccaferri/qbic/http/controllers/WebsocketController.class

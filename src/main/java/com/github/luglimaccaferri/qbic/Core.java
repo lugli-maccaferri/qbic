@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Core {
@@ -46,8 +47,6 @@ public class Core {
     public static final String JARS_PATH = System.getProperty("user.dir") + "/jars";
     private static PublicKey PARENT_KEY;
     private static JWTVerifier verifier;
-    private static final HashMap<String, Server> created_servers = new HashMap<String, Server>();
-    private static final HashMap<String, Server> started_servers = new HashMap<String, Server>();
 
     public Core(){
 
@@ -64,22 +63,6 @@ public class Core {
     public static JsonObject getConfig(){ return config; }
     public static OkHttpClient getHttpClient() { return httpClient; }
     public static JWTVerifier getVerifier(){ return verifier; }
-    public static HashMap<String, Server> getCreatedServers(){ return created_servers; }
-    public static HashMap<String, Server> getStartedServers(){ return started_servers; }
-
-
-    public static void addStartedServer(Server srv){
-
-        created_servers.remove(srv.getServerId());
-        started_servers.put(srv.getServerId(), srv);
-
-    }
-    public static void addCreatedServer(Server srv){
-
-        started_servers.remove(srv.getServerId());
-        created_servers.put(srv.getServerId(), srv);
-
-    }
 
     public static void updatePublicKey(String pk) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -130,7 +113,7 @@ public class Core {
 
             System.out.println("loading servers...");
             loadServers();
-            System.out.printf("%d server(s) loaded!%n", created_servers.size());
+            System.out.printf("%d server(s) loaded!%n", Server.getCreatedSize());
 
             this.router.ignite();
             this.initialized = true;
@@ -166,7 +149,7 @@ public class Core {
                     jar_path = set.getString("jar_path"),
                     owner = set.getString("owner");
 
-            created_servers.put(id, new Server(
+            Server.addCreated(new Server(
                     id, name, jar_path, owner
             ));
 

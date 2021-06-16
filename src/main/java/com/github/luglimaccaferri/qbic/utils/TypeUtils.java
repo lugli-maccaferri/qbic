@@ -1,19 +1,24 @@
 package com.github.luglimaccaferri.qbic.utils;
 
 import com.auth0.jwt.interfaces.Claim;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 public class TypeUtils {
 
     private TypeUtils(){}
+
+    public static ByteBuffer BYTE_BAD_REQUEST = ByteBuffer.allocate(3).put((byte) 4).put((byte) 0).put((byte) 0); // 0x400
+    public static ByteBuffer BYTE_INVALID_CREDENTIALS = ByteBuffer.allocate(3).put((byte) 4).put((byte) 0).put((byte) 1); // 0x401
+    public static ByteBuffer BYTE_FORBIDDEN = ByteBuffer.allocate(3).put((byte) 4).put((byte) 0).put((byte) 3); // 0x403
+    public static ByteBuffer BYTE_NOT_FOUND = ByteBuffer.allocate(3).put((byte) 4).put((byte) 0).put((byte) 4); // 0x404
+    public static ByteBuffer BYTE_GENERIC_ERROR = ByteBuffer.allocate(3).put((byte) 5).put((byte) 0).put((byte) 0); // 0x500
+    public static ByteBuffer SUCCESS = ByteBuffer.allocate(3).put((byte) 2).put((byte) 0).put((byte) 0); // 0x200
 
     public static boolean isUrl(String url) throws MalformedURLException {
 

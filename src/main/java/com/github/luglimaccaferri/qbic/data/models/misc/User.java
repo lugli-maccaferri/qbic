@@ -9,6 +9,8 @@ public class User {
 
     protected final UUID uuid;
     protected String username;
+    protected String emitter;
+
     protected final HashMap<String, Byte> permissions = new HashMap<String, Byte>();
 
     public User(String username, UUID uuid, HashMap<String, Byte> permissions){
@@ -20,10 +22,12 @@ public class User {
     }
 
     public String getUsername() { return username; }
-
     public HashMap<String, Byte> getPermissions() { return permissions; }
-
     public UUID getUUID() { return uuid; }
+    public String getEmitter(){ return this.emitter; }
+    public void resetEmitter(){ this.emitter = ""; }
+
+    public void setEmitter(String server_id){ this.emitter = server_id; }
 
     public static User fromJWT(DecodedJWT jwt){
         HashMap<String, Byte> permissions = new HashMap<String, Byte>();

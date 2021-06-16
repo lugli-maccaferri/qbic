@@ -10,19 +10,21 @@ import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
+import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.*;
 
 public class Server extends Thread {
 
@@ -36,6 +38,10 @@ public class Server extends Thread {
     private Process process;
     private BufferedReader reader;
     private BufferedWriter writer;
+    private final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<Session>();
+
+    private static final ConcurrentHashMap<String, Server> created_servers = new ConcurrentHashMap<String, Server>();
+    private static final ConcurrentHashMap<String, Server> started_servers = new ConcurrentHashMap<String, Server>();
 
     private enum Status {
         BORN,
@@ -69,6 +75,9 @@ public class Server extends Thread {
     public String getJar() { return jar_path; }
     public String getServerName() { return name; }
     public String getOwner() { return owner; }
+    public static Server getStarted(String server_id) { return started_servers.get(server_id); }
+    public static Server getCreated(String server_id) { return created_servers.get(server_id); }
+
 
     @Override
     public void run() {
@@ -78,6 +87,29 @@ public class Server extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public static int getCreatedSize(){ return created_servers.size(); }
+    public static int getStartedSize(){ return started_servers.size(); }
+    public void addListener(Session session){ this.sessions.add(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
+    public void removeListener(Session session){ this.sessions.remove(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
+
+    public static void addCreated(Server server){
+
+        if(created_servers.contains(server)) return;
+
+        created_servers.put(server.getServerId(), server);
+        if(started_servers.contains(server)) started_servers.remove(server.getServerId());
+
+    }
+
+    public static void addStarted(Server server){
+
+        if(started_servers.contains(server)) return;
+
+        started_servers.put(server.getServerId(), server);
+        if(created_servers.contains(server)) created_servers.remove(server.getServerId());
 
     }
 
@@ -101,11 +133,23 @@ public class Server extends Thread {
         );
 
         this.status = Status.RUNNING;
-        Core.addStartedServer(this);
+        addStarted(this);
         System.out.printf("started server %s (pid: %d)%n", this.name, this.process.pid());
         String line;
 
-        while((line = this.reader.readLine()) != null) System.out.println(line);
+        while((line = this.reader.readLine()) != null){
+            if(this.sessions.size() > 0){
+                final String s = line;
+                this.sessions.forEach(session -> {
+                    try {
+                        session.getRemote().sendString(s);
+                    } catch (IOException e) {
+                        // boh è successo qualcosa di brutto veramente dai
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
 
     }
 
@@ -138,7 +182,7 @@ public class Server extends Thread {
 
             conn.commit();
             this.status = Status.CREATED;
-            Core.addCreatedServer(this);
+            addCreated(this);
 
         }catch(Exception e){
 

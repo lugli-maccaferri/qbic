@@ -3,6 +3,7 @@ package com.github.luglimaccaferri.qbic.http;
 import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.controllers.AuthController;
 import com.github.luglimaccaferri.qbic.http.controllers.ServerController;
+import com.github.luglimaccaferri.qbic.http.controllers.WebsocketController;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 
@@ -15,6 +16,8 @@ public class Router {
     public void kill(){ stop(); }
 
     public void ignite(){
+
+        webSocket("/console-stream", WebsocketController.class);
 
         before((req, res) -> {
 

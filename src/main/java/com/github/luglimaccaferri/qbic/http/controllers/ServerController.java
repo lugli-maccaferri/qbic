@@ -33,7 +33,7 @@ public class ServerController {
     public static Route start = (req, res) -> {
 
         String server_id = req.params(":id");
-        Server server = Core.getCreatedServers().get(server_id);
+        Server server = Server.getCreated(server_id);
         User user = req.attribute("user");
 
         if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
