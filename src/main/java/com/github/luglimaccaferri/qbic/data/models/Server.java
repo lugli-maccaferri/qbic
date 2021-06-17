@@ -75,9 +75,37 @@ public class Server extends Thread {
     public String getJar() { return jar_path; }
     public String getServerName() { return name; }
     public String getOwner() { return owner; }
-    public static Server getStarted(String server_id) { return started_servers.get(server_id); }
-    public static Server getCreated(String server_id) { return created_servers.get(server_id); }
+    public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
+    public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
+    public synchronized File getMainDirectory(){
 
+        if(!Files.exists(Path.of(this.main_path))) return null;
+        return new File(this.main_path);
+
+
+    }
+    public synchronized File getResource(String path) throws IOException {
+
+        Path p = Path.of(this.main_path + "/" + path);
+        if(!Files.exists(p)) return null;
+        File f = p.toFile();
+        if(!f.getCanonicalPath().contains(this.main_path)) return null; // in questo modo previene il ../../
+
+        return p.toFile().getCanonicalFile();
+
+
+    }
+    public synchronized static Server find(String server_id){
+
+        Server created = created_servers.get(server_id),
+                started = started_servers.get(server_id);
+
+        if(created != null) return created;
+        if(started != null) return started;
+
+        return null;
+
+    }
 
     @Override
     public void run() {
@@ -90,12 +118,12 @@ public class Server extends Thread {
 
     }
 
-    public static int getCreatedSize(){ return created_servers.size(); }
-    public static int getStartedSize(){ return started_servers.size(); }
-    public void addListener(Session session){ this.sessions.add(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
-    public void removeListener(Session session){ this.sessions.remove(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
+    public synchronized static int getCreatedSize(){ return created_servers.size(); }
+    public synchronized static int getStartedSize(){ return started_servers.size(); }
+    public synchronized void addListener(Session session){ this.sessions.add(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
+    public synchronized void removeListener(Session session){ this.sessions.remove(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
 
-    public static void addCreated(Server server){
+    public synchronized static void addCreated(Server server){
 
         if(created_servers.contains(server)) return;
 
@@ -104,7 +132,7 @@ public class Server extends Thread {
 
     }
 
-    public static void addStarted(Server server){
+    public synchronized static void addStarted(Server server){
 
         if(started_servers.contains(server)) return;
 
@@ -112,6 +140,8 @@ public class Server extends Thread {
         if(created_servers.contains(server)) created_servers.remove(server.getServerId());
 
     }
+
+
 
     private synchronized void startServer() throws IOException {
 
@@ -164,7 +194,7 @@ public class Server extends Thread {
 
     }
 
-    public void create() throws SQLException, HTTPError {
+    public synchronized void create() throws SQLException, HTTPError {
 
         Connection conn = Sqlite.getConnection();
 
@@ -254,7 +284,7 @@ public class Server extends Thread {
 
     }
 
-    private void createFs() throws IOException {
+    private synchronized void createFs() throws IOException {
 
         Files.createDirectory(Path.of(main_path));
         Files.createFile(Path.of(main_path + "/eula.txt"));

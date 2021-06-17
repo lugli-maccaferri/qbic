@@ -1,6 +1,7 @@
 package com.github.luglimaccaferri.qbic.data.models.misc;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.github.luglimaccaferri.qbic.data.models.Server;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -26,6 +27,9 @@ public class User {
     public UUID getUUID() { return uuid; }
     public String getEmitter(){ return this.emitter; }
     public void resetEmitter(){ this.emitter = ""; }
+    public boolean canEditThis(Server server){
+        return isAdmin() || getUUID().toString().equals(server.getOwner());
+    }
 
     public void setEmitter(String server_id){ this.emitter = server_id; }
 

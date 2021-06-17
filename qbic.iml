@@ -25,7 +25,6 @@
     <orderEntry type="library" name="Maven: org.jooq:jool:0.9.14" level="project" />
     <orderEntry type="library" name="Maven: javax:javaee-api:8.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.mail:javax.mail:1.6.2" level="project" />
-    <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: com.sparkjava:spark-core:2.9.3" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-server:9.4.31.v20200723" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.1.0" level="project" />
@@ -42,6 +41,10 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-client:9.4.31.v20200723" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-servlet:9.4.31.v20200723" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-api:9.4.31.v20200723" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.tika:tika-core:1.26" level="project" />
+    <orderEntry type="library" name="Maven: javax.xml.bind:jaxb-api:2.3.1" level="project" />
+    <orderEntry type="library" name="Maven: javax.activation:javax.activation-api:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: javax.activation:activation:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.auth0:java-jwt:3.16.0" level="project" />
     <orderEntry type="library" name="Maven: xyz.luan.spark.decorator:spark-decorator:0.2.0" level="project" />
     <orderEntry type="library" name="Maven: at.favre.lib:bcrypt:0.9.0" level="project" />

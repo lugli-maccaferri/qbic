@@ -17,6 +17,7 @@ com/github/luglimaccaferri/qbic/http/models/HTTPError.class
 com/github/luglimaccaferri/qbic/Core$1.class
 com/github/luglimaccaferri/qbic/data/cli/CliStringItem.class
 com/github/luglimaccaferri/qbic/http/Router.class
+com/github/luglimaccaferri/qbic/utils/FileUtils.class
 com/github/luglimaccaferri/qbic/data/cli/CliItem.class
 com/github/luglimaccaferri/qbic/utils/TypeUtils.class
 com/github/luglimaccaferri/qbic/data/cli/CliParser.class
