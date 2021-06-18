@@ -77,6 +77,16 @@ public class Server extends Thread {
     public String getOwner() { return owner; }
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
     public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
+    public synchronized static ArrayList<HashMap<String, String>> getAll() throws SQLException {
+
+        ArrayList<HashMap<String, String>> servers = new ArrayList<HashMap<String, String>>();
+
+        started_servers.forEach((id, server) -> servers.add(server.toMap()));
+        created_servers.forEach((id, server) -> servers.add(server.toMap()));
+
+        return servers;
+
+    }
     public synchronized File getMainDirectory(){
 
         if(!Files.exists(Path.of(this.main_path))) return null;

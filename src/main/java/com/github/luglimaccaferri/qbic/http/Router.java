@@ -35,7 +35,7 @@ public class Router {
         // root paths
 
         get("/", (req, res) -> {
-            return Ok.SUCCESS.put("message", "ciaooooooo").toResponse(res);
+            return new Ok().put("message", "ciaooooooo").toResponse(res);
         });
         route(true).get("/auth", AuthController.index); // passa direttamente il body della lambda indicata
 
@@ -50,6 +50,8 @@ public class Router {
             route(true).post("/start/:id", ServerController.start);
             route(true).get("/files/:id", ServerController.mainDirectory);
             route(true).get("/files/:id/:path", ServerController.files);
+            get("/list", ServerController.list);
+            route(true).get("/info/:id", ServerController.info);
         });
 
         get("*", (req, res) -> {

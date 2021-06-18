@@ -30,13 +30,13 @@ public class HTTPError extends Exception implements JSONResponse{
     public static final HTTPError SERVER_NOT_FOUND = new HTTPError("server_not_found", 404);
     public static final HTTPError NOT_FOUND = new HTTPError("not_found", 404);
 
-    public String toResponse(Response response){
+    public synchronized String toResponse(Response response){
         response.status(this.errorCode);
         return new Gson().toJson(this.response);
     }
     public int getErrorCode(){ return this.errorCode; }
-    public HTTPError put(String key, Object value){ this.response.put(key, value); return this; }
+    public synchronized HTTPError put(String key, Object value){ this.response.put(key, value); return this; }
 
-    public String print(){ return new Gson().toJson(this.response); }
+    public synchronized String print(){ return new Gson().toJson(this.response); }
 
 }

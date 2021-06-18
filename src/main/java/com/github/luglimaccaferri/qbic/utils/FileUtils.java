@@ -6,9 +6,6 @@ import com.github.luglimaccaferri.qbic.http.models.Ok;
 import org.apache.tika.Tika;
 
 import java.io.*;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,22 +34,22 @@ public class FileUtils {
         if(resource.isDirectory()){
 
             File[] files = resource.listFiles();
-            if(files == null) return Ok.SUCCESS.put("is_directory", true)
+            if(files == null) return new Ok().put("is_directory", true)
                     .put("content", new String[]{});
 
             String[] str_files = Arrays.stream(files).map(File::getName).toArray(size -> new String[files.length]);
 
-            return Ok.SUCCESS.put("is_directory", true)
+            return new Ok().put("is_directory", true)
                     .put("content", str_files);
 
         }
 
         String mime_type = new Tika().detect(resource);
-        if(!Arrays.asList(PRINTABLE_MIMETYPES).contains(mime_type)) return Ok.SUCCESS.put("is_directory", false).put("content", "non-printable content");
+        if(!Arrays.asList(PRINTABLE_MIMETYPES).contains(mime_type)) return new Ok().put("is_directory", false).put("content", "non-printable content");
 
         ArrayList<String> file_lines = FileUtils.readAllLines(resource);
 
-        return Ok.SUCCESS.put("is_directory", false)
+        return new Ok().put("is_directory", false)
                 .put("content", String.join("\n", file_lines));
 
     }

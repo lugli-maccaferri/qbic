@@ -8,9 +8,26 @@ import com.github.luglimaccaferri.qbic.utils.FileUtils;
 import com.github.luglimaccaferri.qbic.utils.RandomString;
 import spark.Route;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 
 public class ServerController {
+
+    public static Route info = (req, res) -> {
+
+        // todo: come back quando ho scritto la lib per la query
+
+        return null;
+
+    };
+
+    public static Route list = (req, res) -> {
+
+        ArrayList<HashMap<String, String>> servers = Server.getAll();
+        return new Ok().put("servers", servers.toArray()).toResponse(res);
+
+    };
 
     public static Route mainDirectory = (req, res) -> {
 
@@ -75,7 +92,7 @@ public class ServerController {
 
         server.create();
 
-        return Ok.SUCCESS.put("server", server.toMap()).toResponse(res);
+        return new Ok().put("server", server.toMap()).toResponse(res);
 
     };
 
@@ -90,7 +107,7 @@ public class ServerController {
 
         server.start(); // ciao vai su un altro thread
 
-        return Ok.SUCCESS.toResponse(res); // ritorna success: true indipendentemente da quello che accade al server, dato che questo rappresenta lo stato della richiesta, piuttosto che quello del server!
+        return new Ok().toResponse(res); // ritorna success: true indipendentemente da quello che accade al server, dato che questo rappresenta lo stato della richiesta, piuttosto che quello del server!
 
     };
 

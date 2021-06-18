@@ -19,18 +19,17 @@ public class Ok implements JSONResponse{
 
     public Ok(){ response.put("success", true); }
 
-
-    public String toResponse(Response response){
+    public synchronized String toResponse(Response response){
         response.status(200);
         return new Gson().toJson(this.response);
     }
-    public Ok put(String key, Object value) {
+    public synchronized Ok put(String key, Object value) {
         if(value instanceof Map<?, ?>) this.response.put(key, TypeUtils.serializeMap((Map<?, ?>) value));
         else this.response.put(key, value);
         return this;
     }
 
-    public String print(){ return new Gson().toJson(this.response); }
+    public synchronized String print(){ return new Gson().toJson(this.response); }
     public static final Ok SUCCESS = new Ok();
 
 
