@@ -79,7 +79,12 @@ public class ServerController {
     public static Route create = (req, res) -> {
 
         User user = req.attribute("user");
-        String jar_path = req.queryParams("jar_path");
+        String jar_path = req.queryParams("jar_path"),
+            query_port = req.queryParams("query-port"),
+            xmx = req.queryParams("xmx"), xms = req.queryParams("xms"), server_port = req.queryParams("server-port");
+
+        if(xmx == null) xmx = "1G";
+        if(xms == null) xms = "1G";
 
         if(!(user.canEditFs() || user.isAdmin())) return HTTPError.FORBIDDEN.toResponse(res);
 
@@ -87,7 +92,12 @@ public class ServerController {
                 RandomString.generateAlphanumeric(32),
                 req.queryParams("name"),
                 jar_path,
-                user.getUUID().toString()
+                user.getUUID().toString(),
+                user.getUsername(),
+                Short.parseShort(query_port),
+                xmx,
+                xms,
+                Short.parseShort(server_port)
         );
 
         server.create();

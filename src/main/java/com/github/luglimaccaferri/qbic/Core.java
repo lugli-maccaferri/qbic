@@ -28,9 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Core {
@@ -147,10 +145,16 @@ public class Core {
             String id = set.getString("id"),
                     name = set.getString("name"),
                     jar_path = set.getString("jar_path"),
-                    owner = set.getString("owner");
+                    owner = set.getString("owner"),
+                    owner_name = set.getString("owner_name"),
+                    xmx = set.getString("xmx"),
+                    xms = set.getString("xms");
+            short query_port = set.getShort("query_port");
+            short server_port = set.getShort("server_port");
+
 
             Server.addCreated(new Server(
-                    id, name, jar_path, owner
+                    id, name, jar_path, owner, owner_name, query_port, xmx, xms, server_port
             ));
 
         }

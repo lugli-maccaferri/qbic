@@ -33,6 +33,12 @@ public class Server extends Thread {
     private final String name;
     private final String owner;
     private final String main_path;
+    private final String owner_name;
+    private final short query_port;
+    private final String xmx;
+    private final String xms;
+    private final short server_port;
+
     private static final String DEFAULT_PATH = "https://static.macca.cloud/qbic/jars/spigot.jar";
     private ProcessBuilder process_builder;
     private Process process;
@@ -55,7 +61,17 @@ public class Server extends Thread {
     };
     private Status status;
 
-    public Server(String id, String name, String jar_path, String owner){
+    public Server(
+            String id,
+            String name,
+            String jar_path,
+            String owner,
+            String owner_name,
+            short query_port,
+            String xmx,
+            String xms,
+            short server_port
+    ){
 
         if(jar_path == null) jar_path = DEFAULT_PATH;
 
@@ -65,6 +81,11 @@ public class Server extends Thread {
         this.owner = owner;
         this.main_path = String.format("%s/%s", Core.SERVERS_PATH, this.id);
         this.status = Status.BORN;
+        this.owner_name = owner_name;
+        this.query_port = query_port;
+        this.xmx = xmx;
+        this.xms = xms;
+        this.server_port = server_port;
 
         // aggiungere parametri opzionali (xmx, xms, port)
 
@@ -75,6 +96,12 @@ public class Server extends Thread {
     public String getJar() { return jar_path; }
     public String getServerName() { return name; }
     public String getOwner() { return owner; }
+    public String getXms() { return xms; }
+    public String getXmx() { return xmx; }
+    public short getServerPort() { return server_port; }
+    public short getQueryPort() { return query_port; }
+    public String getOwnerName() { return owner_name; }
+
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
     public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
     public synchronized static ArrayList<HashMap<String, String>> getAll() throws SQLException {
@@ -161,7 +188,7 @@ public class Server extends Thread {
         this.status = Status.STARTING_UP;
         System.out.printf("starting %s%n", this.name);
 
-        this.process_builder = new ProcessBuilder("java", "-Xmx1G", "-Xms1G", "-jar", "server.jar", "nogui");
+        this.process_builder = new ProcessBuilder("java", "-Xmx" + xmx, "-Xms" + xms, "-jar", "server.jar", "nogui");
         this.process_builder.redirectErrorStream(true);
         this.process_builder.directory(Path.of(this.main_path).toFile());
 
@@ -210,8 +237,17 @@ public class Server extends Thread {
 
         try{
 
-            PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?)");
-            s.setString(1, getServerId()); s.setString(2, getServerName()); s.setString(3, getJar()); s.setString(4, getOwner());
+            PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            s.setString(1, getServerId());
+            s.setString(2, getServerName());
+            s.setString(3, getJar());
+            s.setString(4, getOwner());
+            s.setShort(5, getQueryPort());
+            s.setString(6, getOwnerName());
+            s.setString(7, getXmx());
+            s.setString(8, getXms());
+            s.setShort(9, getServerPort());
+
             s.execute();
             createFs();
 
@@ -299,6 +335,10 @@ public class Server extends Thread {
         Files.createDirectory(Path.of(main_path));
         Files.createFile(Path.of(main_path + "/eula.txt"));
         Files.writeString(Path.of((main_path + "/eula.txt")), "eula=true");
+        Files.createFile(Path.of(main_path + "/server.properties"));
+        Files.writeString(Path.of(main_path + "/server.properties"), "enable-query=true");
+        Files.writeString(Path.of(main_path + "/server.properties"), "query.port=" + String.valueOf(query_port));
+        Files.writeString(Path.of(main_path + "/server.properties"), "server-port=" + String.valueOf(server_port));
 
     }
 
