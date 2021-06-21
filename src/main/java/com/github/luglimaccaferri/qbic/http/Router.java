@@ -52,6 +52,7 @@ public class Router {
             route(true).get("/files/:id/:path", ServerController.files);
             get("/list", ServerController.list);
             get("/info/:id", ServerController.info);
+            route(new String[]{"command"}, true).post("/send-command/:id", ServerController.sendCommand);
         });
 
         get("*", (req, res) -> {

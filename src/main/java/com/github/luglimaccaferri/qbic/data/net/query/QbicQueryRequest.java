@@ -19,7 +19,6 @@ public class QbicQueryRequest {
     }
 
     private final Type req_type;
-    private ByteBuffer stuff;
     private final int SESSION_ID = 1; // può essere qualsiasi cosa, magari facciamolo randomico poi
     private final byte[] payload;
     private final ByteArrayOutputStream bs = new ByteArrayOutputStream();

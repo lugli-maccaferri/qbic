@@ -76,6 +76,11 @@
             <artifactId>java-jwt</artifactId>
             <version>3.16.0</version>
         </dependency>
+        <dependency>
+            <groupId>nl.vv32.rcon</groupId>
+            <artifactId>rcon</artifactId>
+            <version>1.0.3</version>
+        </dependency>
     </dependencies>
 
     <properties>

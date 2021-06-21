@@ -8,6 +8,7 @@ import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 import com.github.luglimaccaferri.qbic.utils.FileUtils;
 import com.github.luglimaccaferri.qbic.utils.RandomString;
+import nl.vv32.rcon.Rcon;
 import spark.Route;
 
 import java.net.SocketTimeoutException;
@@ -16,6 +17,31 @@ import java.util.Base64;
 import java.util.HashMap;
 
 public class ServerController {
+
+    public static Route sendCommand = (req, res) -> {
+
+        try{
+
+            String server_id = req.params(":id"),
+                    command = req.queryParams("command");
+
+            Server server = Server.find(server_id);
+            if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+
+            Rcon rcon = Rcon.open("localhost", server.getRconPort());
+            if(!rcon.authenticate("qbic")) return new HTTPError("invalid_rcon", 500).toResponse(res);
+
+            rcon.sendCommand(command);
+
+            return new Ok().toResponse(res);
+
+        }catch(Exception e){
+
+            return HTTPError.GENERIC_ERROR.toResponse(res);
+
+        }
+
+    };
 
     public static Route info = (req, res) -> {
 
