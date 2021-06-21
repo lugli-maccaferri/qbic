@@ -51,7 +51,7 @@ public class Router {
             route(true).get("/files/:id", ServerController.mainDirectory);
             route(true).get("/files/:id/:path", ServerController.files);
             get("/list", ServerController.list);
-            route(true).get("/info/:id", ServerController.info);
+            get("/info/:id", ServerController.info);
         });
 
         get("*", (req, res) -> {

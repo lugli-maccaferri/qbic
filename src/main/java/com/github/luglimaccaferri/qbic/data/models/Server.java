@@ -11,6 +11,7 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import org.eclipse.jetty.websocket.api.Session;
+import org.sqlite.SQLiteException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -34,10 +35,10 @@ public class Server extends Thread {
     private final String owner;
     private final String main_path;
     private final String owner_name;
-    private final short query_port;
+    private final int query_port;
     private final String xmx;
     private final String xms;
-    private final short server_port;
+    private final int server_port;
 
     private static final String DEFAULT_PATH = "https://static.macca.cloud/qbic/jars/spigot.jar";
     private ProcessBuilder process_builder;
@@ -67,13 +68,11 @@ public class Server extends Thread {
             String jar_path,
             String owner,
             String owner_name,
-            short query_port,
+            int query_port,
             String xmx,
             String xms,
-            short server_port
-    ){
-
-        if(jar_path == null) jar_path = DEFAULT_PATH;
+            int server_port
+    ) throws HTTPError {
 
         this.id = id;
         this.name = name;
@@ -87,7 +86,10 @@ public class Server extends Thread {
         this.xms = xms;
         this.server_port = server_port;
 
-        // aggiungere parametri opzionali (xmx, xms, port)
+        System.out.println(query_port + " " + server_port);
+
+        if(jar_path == null) jar_path = DEFAULT_PATH;
+        if((query_port > 65535 || server_port > 65535) || (query_port < 0 || server_port < 0)) throw new HTTPError("invalid_port_number", 400);
 
     }
 
@@ -98,8 +100,8 @@ public class Server extends Thread {
     public String getOwner() { return owner; }
     public String getXms() { return xms; }
     public String getXmx() { return xmx; }
-    public short getServerPort() { return server_port; }
-    public short getQueryPort() { return query_port; }
+    public int getServerPort() { return server_port; }
+    public int getQueryPort() { return query_port; }
     public String getOwnerName() { return owner_name; }
 
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
@@ -133,6 +135,8 @@ public class Server extends Thread {
 
     }
     public synchronized static Server find(String server_id){
+
+        if(server_id == null) return null;
 
         Server created = created_servers.get(server_id),
                 started = started_servers.get(server_id);
@@ -242,11 +246,11 @@ public class Server extends Thread {
             s.setString(2, getServerName());
             s.setString(3, getJar());
             s.setString(4, getOwner());
-            s.setShort(5, getQueryPort());
+            s.setInt(5, getQueryPort());
             s.setString(6, getOwnerName());
             s.setString(7, getXmx());
             s.setString(8, getXms());
-            s.setShort(9, getServerPort());
+            s.setInt(9, getServerPort());
 
             s.execute();
             createFs();
@@ -262,11 +266,17 @@ public class Server extends Thread {
 
         }catch(Exception e){
 
-            e.printStackTrace();
+            // e.printStackTrace();
             conn.rollback();
 
             if(e instanceof CompletionException)
                 throw new HTTPError("no_jar_found", 404);
+            if(e instanceof SQLiteException){
+                SQLiteException casted_exception = (SQLiteException) e;
+
+                if(casted_exception.getErrorCode() == 19)
+                    throw new HTTPError("port_number_already_existing", 400);
+            }
 
             throw HTTPError.GENERIC_ERROR;
 
@@ -336,9 +346,7 @@ public class Server extends Thread {
         Files.createFile(Path.of(main_path + "/eula.txt"));
         Files.writeString(Path.of((main_path + "/eula.txt")), "eula=true");
         Files.createFile(Path.of(main_path + "/server.properties"));
-        Files.writeString(Path.of(main_path + "/server.properties"), "enable-query=true");
-        Files.writeString(Path.of(main_path + "/server.properties"), "query.port=" + String.valueOf(query_port));
-        Files.writeString(Path.of(main_path + "/server.properties"), "server-port=" + String.valueOf(server_port));
+        Files.writeString(Path.of(main_path + "/server.properties"), "enable-query=true\nquery.port=" + String.valueOf(query_port) + "\nserver-port=" + String.valueOf(server_port));
 
     }
 

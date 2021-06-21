@@ -6,11 +6,11 @@ import java.net.*;
 
 public class QbicQuery {
 
-    private short port;
+    private int port;
     private DatagramSocket socket = null;
     private String address;
 
-    public QbicQuery(String address, short port) throws SocketException, UnknownHostException {
+    public QbicQuery(String address, int port) throws SocketException, UnknownHostException {
 
         this.address = address;
         this.port = port;

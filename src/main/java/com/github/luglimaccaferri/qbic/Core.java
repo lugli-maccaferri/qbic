@@ -7,6 +7,7 @@ import com.github.luglimaccaferri.qbic.data.cli.CliParser;
 import com.github.luglimaccaferri.qbic.data.cli.CliShortItem;
 import com.github.luglimaccaferri.qbic.data.models.sqlite.Sqlite;
 import com.github.luglimaccaferri.qbic.http.Router;
+import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.utils.Migration;
 import com.github.luglimaccaferri.qbic.utils.Security;
 import com.google.gson.JsonObject;
@@ -133,7 +134,7 @@ public class Core {
         return KeyFactory.getInstance("RSA").generatePublic(spec);
     }
 
-    private static void loadServers() throws SQLException {
+    private static void loadServers() throws SQLException, HTTPError {
 
 
         Connection conn = Sqlite.getConnection();
@@ -149,8 +150,8 @@ public class Core {
                     owner_name = set.getString("owner_name"),
                     xmx = set.getString("xmx"),
                     xms = set.getString("xms");
-            short query_port = set.getShort("query_port");
-            short server_port = set.getShort("server_port");
+            int query_port = set.getInt("query_port");
+            int server_port = set.getInt("server_port");
 
 
             Server.addCreated(new Server(
@@ -177,11 +178,29 @@ public class Core {
 
     private void migrate() throws SQLException {
 
+        /*
+        CREATE TABLE servers(
+            id varchar(32) not null primary key,
+            name varchar(255) not null,
+            jar_path varchar(1000) not null,
+            owner varchar(36) not null,
+            query_port unsigned short unique not null,
+            owner_name varchar(255) not null,
+            xmx varchar(255) not null,
+            xms varchar(255) not null,
+            server_port unsigned short unique not null);
+         */
+
         Migration.createTable("servers", new String[]{
                 "id varchar(32) not null primary key,",
                 "name varchar(255) not null,",
                 "jar_path varchar(1000) not null,",
-                "owner varchar(36) not null"
+                "owner varchar(36) not null,",
+                "query_port unsigned short unique not null,",
+                "owner_name varchar(255) not null,",
+                "xmx varchar(255) not null,",
+                "xms varchar(255) not null,",
+                "server_port unsigned short unique not null"
         });
 
     }
