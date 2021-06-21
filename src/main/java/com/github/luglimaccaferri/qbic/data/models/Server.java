@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class Server extends Thread {
 
@@ -36,6 +37,7 @@ public class Server extends Thread {
     private final String main_path;
     private final String owner_name;
     private final int query_port;
+    private final int rcon_port;
     private final String xmx;
     private final String xms;
     private final int server_port;
@@ -71,8 +73,11 @@ public class Server extends Thread {
             int query_port,
             String xmx,
             String xms,
-            int server_port
+            int server_port,
+            int rcon_port
     ) throws HTTPError {
+
+        if(jar_path == null) jar_path = DEFAULT_PATH;
 
         this.id = id;
         this.name = name;
@@ -85,11 +90,10 @@ public class Server extends Thread {
         this.xmx = xmx;
         this.xms = xms;
         this.server_port = server_port;
+        this.rcon_port = rcon_port;
 
-        System.out.println(query_port + " " + server_port);
-
-        if(jar_path == null) jar_path = DEFAULT_PATH;
-        if((query_port > 65535 || server_port > 65535) || (query_port < 0 || server_port < 0)) throw new HTTPError("invalid_port_number", 400);
+        if((query_port > 65535 || server_port > 65535 || rcon_port > 65535) || (query_port < 0 || server_port < 0 || rcon_port < 0)) throw new HTTPError("invalid_port_number", 400);
+        System.out.println(query_port + " - " + server_port + " - " + jar_path);
 
     }
 
@@ -101,9 +105,16 @@ public class Server extends Thread {
     public String getXms() { return xms; }
     public String getXmx() { return xmx; }
     public int getServerPort() { return server_port; }
+    public int getRconPort(){ return rcon_port; }
     public int getQueryPort() { return query_port; }
     public String getOwnerName() { return owner_name; }
+    public boolean isRunning(){ return status == Status.RUNNING; }
+    public static ArrayList<Server> getRunningServers(){ return (ArrayList<Server>) started_servers.values().parallelStream().collect(Collectors.toList()); }
 
+    public boolean executeCommand(String command){
+
+        return true;
+    }
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
     public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
     public synchronized static ArrayList<HashMap<String, String>> getAll() throws SQLException {
@@ -159,6 +170,15 @@ public class Server extends Thread {
 
     }
 
+    public synchronized void stopServer(){
+
+        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP){
+
+
+
+        }
+
+    }
     public synchronized static int getCreatedSize(){ return created_servers.size(); }
     public synchronized static int getStartedSize(){ return started_servers.size(); }
     public synchronized void addListener(Session session){ this.sessions.add(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
@@ -222,6 +242,12 @@ public class Server extends Thread {
             }
         }
 
+        // qualcosa è successo (processo fermato o in error)
+        started_servers.remove(getServerId());
+        created_servers.put(getServerId(), this);
+
+        System.out.format("server %s stopped!\n", getServerName());
+
     }
 
     public HashMap<String, String> toMap(){
@@ -241,7 +267,7 @@ public class Server extends Thread {
 
         try{
 
-            PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement s = conn.prepareStatement("INSERT INTO servers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             s.setString(1, getServerId());
             s.setString(2, getServerName());
             s.setString(3, getJar());
@@ -251,14 +277,10 @@ public class Server extends Thread {
             s.setString(7, getXmx());
             s.setString(8, getXms());
             s.setInt(9, getServerPort());
+            s.setInt(10, getRconPort());
 
             s.execute();
             createFs();
-
-            if(TypeUtils.isUrl(jar_path))
-                downloadJar();
-            else
-                copyJar();
 
             conn.commit();
             this.status = Status.CREATED;
@@ -266,7 +288,7 @@ public class Server extends Thread {
 
         }catch(Exception e){
 
-            // e.printStackTrace();
+            e.printStackTrace();
             conn.rollback();
 
             if(e instanceof CompletionException)
@@ -340,13 +362,18 @@ public class Server extends Thread {
 
     }
 
-    private synchronized void createFs() throws IOException {
+    public synchronized void createFs() throws IOException {
 
         Files.createDirectory(Path.of(main_path));
         Files.createFile(Path.of(main_path + "/eula.txt"));
         Files.writeString(Path.of((main_path + "/eula.txt")), "eula=true");
         Files.createFile(Path.of(main_path + "/server.properties"));
-        Files.writeString(Path.of(main_path + "/server.properties"), "enable-query=true\nquery.port=" + String.valueOf(query_port) + "\nserver-port=" + String.valueOf(server_port));
+        Files.writeString(Path.of(main_path + "/server.properties"), "enable-rcon=true\nrcon.password=qbic\nrcon.port=" + String.valueOf(rcon_port) + "enable-query=true\nquery.port=" + String.valueOf(query_port) + "\nserver-port=" + String.valueOf(server_port));
+
+        if(TypeUtils.isUrl(this.jar_path))
+            downloadJar();
+        else
+            copyJar();
 
     }
 

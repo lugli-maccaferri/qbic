@@ -46,7 +46,7 @@ public class Router {
         });
 
         path("/server", () -> {
-            route(new String[]{"name", "query-port", "server-port"}, true).post("/create", ServerController.create);
+            route(new String[]{"name", "query-port", "server-port", "rcon-port"}, true).post("/create", ServerController.create);
             route(true).post("/start/:id", ServerController.start);
             route(true).get("/files/:id", ServerController.mainDirectory);
             route(true).get("/files/:id/:path", ServerController.files);

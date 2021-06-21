@@ -134,7 +134,7 @@ public class Core {
         return KeyFactory.getInstance("RSA").generatePublic(spec);
     }
 
-    private static void loadServers() throws SQLException, HTTPError {
+    private static void loadServers() throws SQLException, HTTPError, IOException {
 
 
         Connection conn = Sqlite.getConnection();
@@ -152,11 +152,15 @@ public class Core {
                     xms = set.getString("xms");
             int query_port = set.getInt("query_port");
             int server_port = set.getInt("server_port");
+            int rcon_port = set.getInt("rcon_port");
 
+            Server server = new Server(
+                    id, name, jar_path, owner, owner_name, query_port, xmx, xms, server_port, rcon_port
+            );
+            if(!Files.exists(Path.of(SERVERS_PATH + "/" + server.getServerId())))
+                server.createFs();
 
-            Server.addCreated(new Server(
-                    id, name, jar_path, owner, owner_name, query_port, xmx, xms, server_port
-            ));
+            Server.addCreated(server);
 
         }
 
@@ -168,10 +172,24 @@ public class Core {
             public void run(){
 
                 System.out.println("qbic quitting...");
-                // fare graceful shutdown qua
+                try {
+                    gracefulShutdown();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
 
 
             }
+        });
+
+    }
+
+    private void gracefulShutdown() throws SQLException {
+
+        this.router.kill();
+        Server.getRunningServers().forEach(server -> {
+            System.out.format("stopping %s\n", server.getServerName());
+            server.stopServer();
         });
 
     }
@@ -188,7 +206,8 @@ public class Core {
             owner_name varchar(255) not null,
             xmx varchar(255) not null,
             xms varchar(255) not null,
-            server_port unsigned short unique not null);
+            server_port unsigned short unique not null
+            rcon_port unsigned short unique not null);
          */
 
         Migration.createTable("servers", new String[]{
@@ -200,7 +219,8 @@ public class Core {
                 "owner_name varchar(255) not null,",
                 "xmx varchar(255) not null,",
                 "xms varchar(255) not null,",
-                "server_port unsigned short unique not null"
+                "server_port unsigned short unique not null,",
+                "rcon_port unsigned short unique not null"
         });
 
     }

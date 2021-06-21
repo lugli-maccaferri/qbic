@@ -1,10 +1,9 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
 
-import com.github.luglimaccaferri.qbic.Qbic;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import com.github.luglimaccaferri.qbic.data.models.misc.User;
-import com.github.luglimaccaferri.qbic.data.net.QbicQuery;
-import com.github.luglimaccaferri.qbic.data.net.QbicQueryResponse;
+import com.github.luglimaccaferri.qbic.data.net.query.QbicQuery;
+import com.github.luglimaccaferri.qbic.data.net.query.QbicQueryResponse;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 import com.github.luglimaccaferri.qbic.utils.FileUtils;
@@ -109,6 +108,7 @@ public class ServerController {
             User user = req.attribute("user");
             String jar_path = req.queryParams("jar_path"),
                     query_port = req.queryParams("query-port"),
+                    rcon_port = req.queryParams("rcon-port"),
                     xmx = req.queryParams("xmx"), xms = req.queryParams("xms"), server_port = req.queryParams("server-port");
 
             if(xmx == null) xmx = "1G";
@@ -125,7 +125,8 @@ public class ServerController {
                     Integer.parseInt(query_port),
                     xmx,
                     xms,
-                    Integer.parseInt(server_port)
+                    Integer.parseInt(server_port),
+                    Integer.parseInt(rcon_port)
             );
 
             server.create();

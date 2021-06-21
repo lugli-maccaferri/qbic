@@ -1,4 +1,4 @@
-package com.github.luglimaccaferri.qbic.data.net;
+package com.github.luglimaccaferri.qbic.data.net.query;
 
 import java.nio.ByteBuffer;
 
