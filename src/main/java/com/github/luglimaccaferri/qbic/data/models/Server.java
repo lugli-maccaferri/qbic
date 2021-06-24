@@ -368,7 +368,7 @@ public class Server extends Thread {
         Files.createFile(Path.of(main_path + "/eula.txt"));
         Files.writeString(Path.of((main_path + "/eula.txt")), "eula=true");
         Files.createFile(Path.of(main_path + "/server.properties"));
-        Files.writeString(Path.of(main_path + "/server.properties"), "enable-rcon=true\nrcon.password=qbic\nrcon.port=" + String.valueOf(rcon_port) + "enable-query=true\nquery.port=" + String.valueOf(query_port) + "\nserver-port=" + String.valueOf(server_port));
+        Files.writeString(Path.of(main_path + "/server.properties"), "enable-rcon=true\nrcon.password=qbic\nrcon.port=" + String.valueOf(rcon_port) + "\nenable-query=true\nquery.port=" + String.valueOf(query_port) + "\nserver-port=" + String.valueOf(server_port));
 
         if(TypeUtils.isUrl(this.jar_path))
             downloadJar();

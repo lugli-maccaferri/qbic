@@ -11,6 +11,7 @@ import com.github.luglimaccaferri.qbic.utils.RandomString;
 import nl.vv32.rcon.Rcon;
 import spark.Route;
 
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -31,11 +32,14 @@ public class ServerController {
             Rcon rcon = Rcon.open("localhost", server.getRconPort());
             if(!rcon.authenticate("qbic")) return new HTTPError("invalid_rcon", 500).toResponse(res);
 
-            rcon.sendCommand(command);
+            String response = rcon.sendCommand(command);
 
-            return new Ok().toResponse(res);
+            return new Ok().put("command_response", response).toResponse(res);
 
         }catch(Exception e){
+
+            e.printStackTrace();
+            if(e instanceof ConnectException) return new HTTPError("failed_rcon", 500).toResponse(res);
 
             return HTTPError.GENERIC_ERROR.toResponse(res);
 
