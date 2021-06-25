@@ -113,6 +113,7 @@ public class ServerController {
         try{
             User user = req.attribute("user");
             String id = req.params(":id"), path = new String(Base64.getDecoder().decode(req.params(":path")));
+
             // path è encodato in base64 per facilitarne la trasmissione
             // path sostanzialmente indica la cartella/file che si vuole visualizzare
 
@@ -166,6 +167,30 @@ public class ServerController {
         }catch(Exception e){
 
             System.out.println(e.toString());
+
+            return HTTPError.GENERIC_ERROR.toResponse(res);
+
+        }
+
+    };
+
+    public static Route stop = (req, res) -> {
+
+        try{
+
+            String server_id = req.params(":id");
+            Server server = Server.getStarted(server_id);
+            User user = req.attribute("user");
+
+            if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            if(!user.canEditThis(server)) return HTTPError.UNAUTHORIZED.toResponse(res);
+
+            server.stopServer();
+            return new Ok().toResponse(res);
+
+        }catch(Exception e){
+
+            e.printStackTrace();
 
             return HTTPError.GENERIC_ERROR.toResponse(res);
 

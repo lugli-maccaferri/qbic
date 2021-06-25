@@ -110,11 +110,6 @@ public class Server extends Thread {
     public String getOwnerName() { return owner_name; }
     public boolean isRunning(){ return status == Status.RUNNING; }
     public static ArrayList<Server> getRunningServers(){ return (ArrayList<Server>) started_servers.values().parallelStream().collect(Collectors.toList()); }
-
-    public boolean executeCommand(String command){
-
-        return true;
-    }
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
     public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
     public synchronized static ArrayList<HashMap<String, String>> getAll() throws SQLException {
@@ -131,7 +126,6 @@ public class Server extends Thread {
 
         if(!Files.exists(Path.of(this.main_path))) return null;
         return new File(this.main_path);
-
 
     }
     public synchronized File getResource(String path) throws IOException {
@@ -172,11 +166,7 @@ public class Server extends Thread {
 
     public synchronized void stopServer(){
 
-        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP){
-
-
-
-        }
+        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP) this.process.destroy();
 
     }
     public synchronized static int getCreatedSize(){ return created_servers.size(); }
@@ -204,49 +194,65 @@ public class Server extends Thread {
 
 
 
-    private synchronized void startServer() throws IOException {
+    private void startServer() throws IOException {
 
-        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP)
-            return;
+        /*
+         *  questo metodo non può essere TUTTO synchronized
+         *  perché altrimenti quando il server va (ovvero il metodo startServer() non è ancora terminato)
+         *  non riesco a fare nient'altro
+         *
+         * */
 
-        this.status = Status.STARTING_UP;
-        System.out.printf("starting %s%n", this.name);
+        synchronized (this){
 
-        this.process_builder = new ProcessBuilder("java", "-Xmx" + xmx, "-Xms" + xms, "-jar", "server.jar", "nogui");
-        this.process_builder.redirectErrorStream(true);
-        this.process_builder.directory(Path.of(this.main_path).toFile());
+            if(this.status == Status.RUNNING || this.status == Status.STARTING_UP)
+                return;
 
-        this.process = this.process_builder.start();
-        this.reader = new BufferedReader(
-                new InputStreamReader(
-                        this.process.getInputStream()
-                )
-        );
+            this.status = Status.STARTING_UP;
+            System.out.printf("starting %s%n", this.name);
 
-        this.status = Status.RUNNING;
-        addStarted(this);
+            this.process_builder = new ProcessBuilder("java", "-Xmx" + xmx, "-Xms" + xms, "-jar", "server.jar", "nogui");
+            this.process_builder.redirectErrorStream(true);
+            this.process_builder.directory(Path.of(this.main_path).toFile());
+
+            this.process = this.process_builder.start();
+            this.reader = new BufferedReader(
+                    new InputStreamReader(
+                            this.process.getInputStream()
+                    )
+            );
+
+            this.status = Status.RUNNING;
+            addStarted(this);
+
+        }
+
         System.out.printf("started server %s (pid: %d)%n", this.name, this.process.pid());
         String line;
 
-        while((line = this.reader.readLine()) != null){
-            if(this.sessions.size() > 0){
-                final String s = line;
-                this.sessions.forEach(session -> {
-                    try {
-                        session.getRemote().sendString(s);
-                    } catch (IOException e) {
-                        // boh è successo qualcosa di brutto veramente dai
-                        e.printStackTrace();
-                    }
-                });
+        try{
+            while((line = this.reader.readLine()) != null){
+                if(this.sessions.size() > 0){
+                    final String s = line;
+                    this.sessions.forEach(session -> {
+                        try {
+                            session.getRemote().sendString(s);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
             }
+        }catch(IOException e){
+            System.out.format("closed console stream for %s\n", id);
+        }finally{
+            // qualcosa è successo (processo fermato o in error)
+            started_servers.remove(getServerId());
+            created_servers.put(getServerId(), this);
+            this.sessions.forEach(Session::close);
+
+            System.out.format("server %s stopped!\n", getServerName());
         }
-
-        // qualcosa è successo (processo fermato o in error)
-        started_servers.remove(getServerId());
-        created_servers.put(getServerId(), this);
-
-        System.out.format("server %s stopped!\n", getServerName());
 
     }
 

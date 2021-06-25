@@ -48,6 +48,7 @@ public class Router {
         path("/server", () -> {
             route(new String[]{"name", "query-port", "server-port", "rcon-port"}, true).post("/create", ServerController.create);
             route(true).post("/start/:id", ServerController.start);
+            route(true).post("/stop/:id", ServerController.stop);
             route(true).get("/files/:id", ServerController.mainDirectory);
             route(true).get("/files/:id/:path", ServerController.files);
             get("/list", ServerController.list);
@@ -55,9 +56,7 @@ public class Router {
             route(new String[]{"command"}, true).post("/send-command/:id", ServerController.sendCommand);
         });
 
-        get("*", (req, res) -> {
-            return HTTPError.NOT_FOUND.toResponse(res);
-        });
+        get("*", (req, res) -> HTTPError.NOT_FOUND.toResponse(res));
 
         exception(HTTPError.class, (e, req, res) -> {
             res.status(e.getErrorCode());
