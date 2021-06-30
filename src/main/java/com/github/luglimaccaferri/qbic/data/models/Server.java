@@ -3,6 +3,7 @@ package com.github.luglimaccaferri.qbic.data.models;
 import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.data.models.sqlite.Sqlite;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
+import com.github.luglimaccaferri.qbic.utils.FileUtils;
 import com.github.luglimaccaferri.qbic.utils.TypeUtils;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -132,8 +133,7 @@ public class Server extends Thread {
 
         Path p = Path.of(this.main_path + "/" + path);
         if(!Files.exists(p)) return null;
-        File f = p.toFile();
-        if(!f.getCanonicalPath().contains(this.main_path)) return null; // in questo modo previene il ../../
+        if(!FileUtils.isValidPath(path, this.main_path)) return null; // in questo modo previene il ../../
 
         return p.toFile().getCanonicalFile();
 

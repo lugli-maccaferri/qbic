@@ -6,6 +6,7 @@ import com.github.luglimaccaferri.qbic.http.models.Ok;
 import org.apache.tika.Tika;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -25,6 +26,11 @@ public class FileUtils {
 
         return lines;
 
+    }
+
+    public static boolean isValidPath(String supposed_path, String main_path) throws IOException {
+        File f = Path.of(supposed_path).toFile();
+        return f.getCanonicalPath().contains(main_path);
     }
 
     public static JSONResponse handleResource(File resource) throws IOException {

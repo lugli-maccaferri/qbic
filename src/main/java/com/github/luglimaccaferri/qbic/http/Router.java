@@ -51,6 +51,8 @@ public class Router {
             route(true).post("/stop/:id", ServerController.stop);
             route(true).get("/files/:id", ServerController.mainDirectory);
             route(true).get("/files/:id/:path", ServerController.files);
+            route(true).post("/edit/:id/:path", ServerController.editFile);
+            route(true).post("/create/:id/:path", ServerController.createFile);
             get("/list", ServerController.list);
             get("/info/:id", ServerController.info);
             route(new String[]{"command"}, true).post("/send-command/:id", ServerController.sendCommand);

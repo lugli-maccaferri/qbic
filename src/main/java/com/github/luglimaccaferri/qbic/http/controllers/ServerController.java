@@ -10,14 +10,77 @@ import com.github.luglimaccaferri.qbic.utils.FileUtils;
 import com.github.luglimaccaferri.qbic.utils.RandomString;
 import nl.vv32.rcon.Rcon;
 import spark.Route;
-
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 
 public class ServerController {
+
+    public static Route createFile = (req, res) -> {
+
+        try{
+
+            String server_id = req.params(":id"),
+                    path = new String(Base64.getDecoder().decode(req.params(":path")));
+
+            Server server = Server.find(server_id);
+            if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            if(server.getResource(path) != null) return new HTTPError("file_already_exists", 409).toResponse(res);
+            if(!FileUtils.isValidPath(server.getMainDirectory().toPath().toString() + "/" + path, server.getMainDirectory().toPath().toString())) return HTTPError.BAD_REQUEST.toResponse(res);
+
+            Files.createFile(Path.of(
+                    server.getMainDirectory().toPath().toString() + "/" + path
+            ));
+
+            return new Ok().toResponse(res);
+
+        }catch(Exception e){
+
+            e.printStackTrace();
+            return HTTPError.GENERIC_ERROR.toResponse(res);
+
+        }
+
+    };
+
+    public static Route editFile = (req, res) -> {
+
+        try{
+
+            String server_id = req.params(":id"),
+                    path = new String(Base64.getDecoder().decode(req.params(":path")));
+            String file_contents = req.queryParams("file-contents");
+            Server server = Server.find(server_id);
+
+            if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            File resource = server.getResource(path);
+            if(resource == null) return HTTPError.RESOURCE_NOT_FOUND.toResponse(res);
+
+            FileOutputStream fout = new FileOutputStream(resource.getAbsolutePath());
+            BufferedOutputStream bout = new BufferedOutputStream(fout);
+            byte[] content = file_contents.getBytes();
+            bout.write(content);
+
+            bout.close();
+            fout.close();
+
+            return new Ok().toResponse(res);
+
+        }catch(Exception e){
+
+            e.printStackTrace();
+            return HTTPError.GENERIC_ERROR.toResponse(res);
+
+        }
+
+    };
 
     public static Route sendCommand = (req, res) -> {
 
@@ -112,7 +175,8 @@ public class ServerController {
 
         try{
             User user = req.attribute("user");
-            String id = req.params(":id"), path = new String(Base64.getDecoder().decode(req.params(":path")));
+            String id = req.params(":id"),
+                    path = new String(Base64.getDecoder().decode(req.params(":path")));
 
             // path è encodato in base64 per facilitarne la trasmissione
             // path sostanzialmente indica la cartella/file che si vuole visualizzare

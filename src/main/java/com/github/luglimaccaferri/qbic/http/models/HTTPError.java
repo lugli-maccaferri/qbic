@@ -29,6 +29,7 @@ public class HTTPError extends Exception implements JSONResponse{
     public static final HTTPError UNAUTHORIZED = new HTTPError("unauthorized", 401);
     public static final HTTPError SERVER_NOT_FOUND = new HTTPError("server_not_found", 404);
     public static final HTTPError NOT_FOUND = new HTTPError("not_found", 404);
+    public static final HTTPError RESOURCE_NOT_FOUND = new HTTPError("resource_not_found", 404);
 
     public synchronized String toResponse(Response response){
         response.status(this.errorCode);
