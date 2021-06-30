@@ -132,7 +132,9 @@ public class Server extends Thread {
     public synchronized File getResource(String path) throws IOException {
 
         Path p = Path.of(this.main_path + "/" + path);
+        System.out.println(p);
         if(!Files.exists(p)) return null;
+        System.out.println("dododod");
         if(!FileUtils.isValidPath(path, this.main_path)) return null; // in questo modo previene il ../../
 
         return p.toFile().getCanonicalFile();

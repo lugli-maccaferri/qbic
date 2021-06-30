@@ -15,29 +15,74 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class ServerController {
+
+    public static Route deleteFile = (req, res) -> {
+
+        try{
+
+            String server_id = req.params(":id"),
+                    path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
+            User user = req.attribute("user");
+            Server server = Server.find(server_id);
+
+            System.out.println(path);
+
+            if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            if(!user.canEditThis(server)) return HTTPError.UNAUTHORIZED.toResponse(res);
+            if(!FileUtils.isValidPath(server.getMainDirectory().toPath().toString() + "/" + path, server.getMainDirectory().toPath().toString())) return HTTPError.BAD_REQUEST.toResponse(res);
+
+            File resource = server.getResource(path);
+            if(resource == null) return HTTPError.RESOURCE_NOT_FOUND.toResponse(res);
+
+            if(resource.isDirectory()){
+
+                Files
+                        .walk(Path.of(resource.getAbsolutePath()))
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+
+            }else Files.deleteIfExists(Path.of(resource.getAbsolutePath()));
+
+            return new Ok().toResponse(res);
+
+        }catch(Exception e){
+
+            e.printStackTrace();
+            return HTTPError.GENERIC_ERROR.toResponse(res);
+
+        }
+
+    };
 
     public static Route createFile = (req, res) -> {
 
         try{
 
             String server_id = req.params(":id"),
-                    path = new String(Base64.getDecoder().decode(req.params(":path")));
+                    path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
+            boolean is_dir = Boolean.parseBoolean(req.queryParams("is-directory"));
 
             Server server = Server.find(server_id);
+            User user = req.attribute("user");
+
             if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
-            if(server.getResource(path) != null) return new HTTPError("file_already_exists", 409).toResponse(res);
+            if(!user.canEditThis(server)) return HTTPError.UNAUTHORIZED.toResponse(res);
             if(!FileUtils.isValidPath(server.getMainDirectory().toPath().toString() + "/" + path, server.getMainDirectory().toPath().toString())) return HTTPError.BAD_REQUEST.toResponse(res);
 
-            Files.createFile(Path.of(
-                    server.getMainDirectory().toPath().toString() + "/" + path
-            ));
+            File resource = server.getResource(path);
+            if(resource != null) return new HTTPError("file_already_exists", 409).toResponse(res); // wtf perché non va whatt
+
+            FileUtils.resolveAndCreate(server, path, is_dir);
 
             return new Ok().toResponse(res);
 
@@ -55,11 +100,13 @@ public class ServerController {
         try{
 
             String server_id = req.params(":id"),
-                    path = new String(Base64.getDecoder().decode(req.params(":path")));
+                    path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
             String file_contents = req.queryParams("file-contents");
             Server server = Server.find(server_id);
+            User user = req.attribute("user");
 
             if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            if(!user.canEditThis(server)) return HTTPError.UNAUTHORIZED.toResponse(res);
             File resource = server.getResource(path);
             if(resource == null) return HTTPError.RESOURCE_NOT_FOUND.toResponse(res);
 
@@ -88,9 +135,11 @@ public class ServerController {
 
             String server_id = req.params(":id"),
                     command = req.queryParams("command");
+            User user = req.attribute("user");
 
             Server server = Server.find(server_id);
             if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
+            if(!user.canEditThis(server)) return HTTPError.UNAUTHORIZED.toResponse(res);
 
             Rcon rcon = Rcon.open("localhost", server.getRconPort());
             if(!rcon.authenticate("qbic")) return new HTTPError("invalid_rcon", 500).toResponse(res);
@@ -176,7 +225,7 @@ public class ServerController {
         try{
             User user = req.attribute("user");
             String id = req.params(":id"),
-                    path = new String(Base64.getDecoder().decode(req.params(":path")));
+                    path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
 
             // path è encodato in base64 per facilitarne la trasmissione
             // path sostanzialmente indica la cartella/file che si vuole visualizzare
