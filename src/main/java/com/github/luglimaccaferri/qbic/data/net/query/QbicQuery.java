@@ -3,12 +3,13 @@ package com.github.luglimaccaferri.qbic.data.net.query;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 
 public class QbicQuery {
 
-    private int port;
+    private final int port;
     private DatagramSocket socket = null;
-    private String address;
+    private final String address;
 
     public QbicQuery(String address, int port) throws SocketException, UnknownHostException {
 
@@ -37,9 +38,21 @@ public class QbicQuery {
         int token = generateChallengeToken();
         byte[] bytes = new QbicQueryRequest(QbicQueryRequest.Type.BASIC_STAT, token).toBytes();
 
-        return new QbicQueryResponse(send(bytes));
+        return new QbicQueryResponse(send(bytes), false);
 
     }
+
+    public QbicQueryResponse fullStat() throws IOException{
+
+        int token = generateChallengeToken();
+        byte[] bytes = new QbicQueryRequest(QbicQueryRequest.Type.FULL_STAT, token).toBytes();
+
+        System.out.println(Arrays.toString(bytes));
+
+        return new QbicQueryResponse(send(bytes), true);
+
+    }
+
     public int generateChallengeToken() throws IOException {
 
         byte[] bytes = new QbicQueryRequest(QbicQueryRequest.Type.HANDSHAKE).toBytes();

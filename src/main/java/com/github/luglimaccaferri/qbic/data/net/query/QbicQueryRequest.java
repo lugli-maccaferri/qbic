@@ -9,13 +9,12 @@ public class QbicQueryRequest {
 
     public enum Type {
         HANDSHAKE((byte) 9),
-        BASIC_STAT((byte) 0);
+        BASIC_STAT((byte) 0),
+        FULL_STAT((byte) 0);
 
         public final byte type;
 
-        private Type(byte t) {
-            this.type = t;
-        }
+        private Type(byte t) { this.type = t; }
     }
 
     private final Type req_type;
@@ -41,7 +40,8 @@ public class QbicQueryRequest {
         data.writeInt(SESSION_ID);
         data.write(payload);
 
-        if(req_type == Type.HANDSHAKE) data.write(new byte[]{0, 0, 0, 0});
+        if(req_type == Type.HANDSHAKE || req_type == Type.FULL_STAT)
+            data.write(new byte[]{0, 0, 0, 0});
 
         return bs.toByteArray();
 

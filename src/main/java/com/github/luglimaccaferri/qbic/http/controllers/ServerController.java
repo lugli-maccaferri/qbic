@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -167,7 +166,7 @@ public class ServerController {
 
             if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
             QbicQuery query = new QbicQuery("localhost", server.getQueryPort());
-            QbicQueryResponse response = query.basicStat();
+            QbicQueryResponse response = query.fullStat();
 
             return new Ok()
                     .put("motd", response.getMotd())
@@ -175,6 +174,9 @@ public class ServerController {
                     .put("max_players", Integer.parseInt(response.getMaxPlayers()))
                     .put("gamemode", response.getGametype())
                     .put("main_world", response.getMap())
+                    .put("players", response.getPlayers())
+                    .put("plugins", response.getPlugins())
+                    .put("version", response.getVersion())
                     .toResponse(res);
 
         }catch(Exception e){
