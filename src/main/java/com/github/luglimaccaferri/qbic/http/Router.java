@@ -21,6 +21,8 @@ public class Router {
 
         before((req, res) -> {
 
+            res.header("Access-Control-Allow-Origin", "*"); // debug da togliere in prod
+            res.header("Access-Control-Allow-Headers", "*"); // debug
             res.type("application/json");
 
             String contentType = req.headers("Content-Type");
@@ -29,6 +31,21 @@ public class Router {
 
             Core.logger.warn(requestMethod + " " + url);
             Core.logger.warn(contentType);
+
+        });
+
+        options("/*", (req, res) -> {
+
+            String accessControlRequestHeaders = req.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                res.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = req.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                res.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+            return "OK";
 
         });
 

@@ -165,7 +165,7 @@ public class ServerController {
             Server server = Server.find(server_id);
 
             if(server == null) return HTTPError.SERVER_NOT_FOUND.toResponse(res);
-            QbicQuery query = new QbicQuery("localhost", server.getQueryPort());
+            QbicQuery query = new QbicQuery("", server.getQueryPort());
             QbicQueryResponse response = query.fullStat();
 
             return new Ok()
