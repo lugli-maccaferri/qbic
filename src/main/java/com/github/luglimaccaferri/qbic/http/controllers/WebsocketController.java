@@ -37,7 +37,7 @@ public class WebsocketController {
 
         if(emitter == null) return;
 
-        Server.getStarted(emitter).removeListener(s);
+        Server.find(emitter).removeListener(s);
         sessions.remove(s);
 
     }
@@ -78,7 +78,7 @@ public class WebsocketController {
                     user = sessions.get(session);
 
                     if(user == null){ session.getRemote().sendBytes(TypeUtils.BYTE_FORBIDDEN.rewind()); return; }
-                    server = Server.getStarted(server_id);
+                    server = Server.find(server_id);
                     if(server == null){ session.getRemote().sendBytes(TypeUtils.BYTE_NOT_FOUND.rewind()); return; }
 
                     server.addListener(session);

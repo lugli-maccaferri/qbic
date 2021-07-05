@@ -87,9 +87,10 @@ public class Router {
             get("/list", ServerController.list);
             get("/info/:id", ServerController.info);
             route(new String[]{"command"}, true).post("/send-command/:id", ServerController.sendCommand);
+            route(true).get("/:id", ServerController.getServer);
         });
 
-        get("*", (req, res) -> HTTPError.NOT_FOUND.toResponse(res));
+        // get("*", (req, res) -> HTTPError.NOT_FOUND.toResponse(res));
 
         exception(HTTPError.class, (e, req, res) -> {
             res.status(e.getErrorCode());

@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class Server extends Thread {
+public class Server {
 
     private final String jar_path;
     private final String id;
@@ -44,10 +44,7 @@ public class Server extends Thread {
     private final int server_port;
 
     private static final String DEFAULT_PATH = "https://static.macca.cloud/qbic/jars/spigot.jar";
-    private ProcessBuilder process_builder;
-    private Process process;
-    private BufferedReader reader;
-    private BufferedWriter writer;
+    private ServerRunner runner;
     private final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<Session>();
 
     private static final ConcurrentHashMap<String, Server> created_servers = new ConcurrentHashMap<String, Server>();
@@ -99,6 +96,7 @@ public class Server extends Thread {
     }
 
     public Status getStatus(){ return status; }
+    public ConcurrentLinkedQueue<Session> getSessions(){ return sessions; }
     public String getServerId() { return id; }
     public String getJar() { return jar_path; }
     public String getServerName() { return name; }
@@ -134,7 +132,6 @@ public class Server extends Thread {
         Path p = Path.of(this.main_path + "/" + path);
         System.out.println(p);
         if(!Files.exists(p)) return null;
-        System.out.println("dododod");
         if(!FileUtils.isValidPath(path, this.main_path)) return null; // in questo modo previene il ../../
 
         return p.toFile().getCanonicalFile();
@@ -155,20 +152,22 @@ public class Server extends Thread {
 
     }
 
-    @Override
-    public void run() {
+    public synchronized void start(){
 
-        try {
-            this.startServer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP) return;
+
+        this.runner = new ServerRunner(this);
+        this.runner.start();
+        this.status = Status.RUNNING;
+        addStarted(this);
 
     }
 
     public synchronized void stopServer(){
 
-        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP) this.process.destroy();
+        if(this.status == Status.RUNNING || this.status == Status.STARTING_UP)
+            this.runner.destroyProcess();
+        this.status = Status.CREATED;
 
     }
     public synchronized static int getCreatedSize(){ return created_servers.size(); }
@@ -196,14 +195,7 @@ public class Server extends Thread {
 
 
 
-    private void startServer() throws IOException {
-
-        /*
-         *  questo metodo non può essere TUTTO synchronized
-         *  perché altrimenti quando il server va (ovvero il metodo startServer() non è ancora terminato)
-         *  non riesco a fare nient'altro
-         *
-         * */
+    /*private void startServer() throws IOException {
 
         synchronized (this){
 
@@ -256,7 +248,7 @@ public class Server extends Thread {
             System.out.format("server %s stopped!\n", getServerName());
         }
 
-    }
+    }*/
 
     public HashMap<String, String> toMap(){
 
