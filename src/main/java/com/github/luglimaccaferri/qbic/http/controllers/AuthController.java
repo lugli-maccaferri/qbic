@@ -3,6 +3,7 @@ package com.github.luglimaccaferri.qbic.http.controllers;
 import com.auth0.jwt.interfaces.Claim;
 import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
+import com.google.gson.JsonObject;
 import spark.Route;
 
 import java.util.Map;
@@ -21,7 +22,8 @@ public class AuthController {
 
     public static Route publicKey = (req, res) -> {
 
-        String public_key = req.queryParams("public-key");
+        JsonObject body = req.attribute("parsed-body");
+        String public_key = body.get("public-key").getAsString();
 
         // trovare un modo decente per verificare la veridicità dell'authserver
 

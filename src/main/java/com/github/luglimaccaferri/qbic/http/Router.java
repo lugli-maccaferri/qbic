@@ -6,6 +6,7 @@ import com.github.luglimaccaferri.qbic.http.controllers.ServerController;
 import com.github.luglimaccaferri.qbic.http.controllers.WebsocketController;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
+import com.google.gson.JsonParser;
 
 import static com.github.luglimaccaferri.qbic.http.models.ProtectedRoute.route;
 import static spark.Spark.*;
@@ -21,9 +22,11 @@ public class Router {
 
         before((req, res) -> {
 
-            res.header("Access-Control-Allow-Origin", "*"); // debug da togliere in prod
+            res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // debug da togliere in prod
             res.header("Access-Control-Allow-Headers", "*"); // debug
+            res.header("Access-Control-Allow-Credentials", "true");
             res.type("application/json");
+            req.attribute("parsed-body", JsonParser.parseString(req.body()));
 
             String contentType = req.headers("Content-Type");
             String requestMethod = req.requestMethod();

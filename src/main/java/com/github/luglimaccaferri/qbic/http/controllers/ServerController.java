@@ -8,6 +8,7 @@ import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
 import com.github.luglimaccaferri.qbic.utils.FileUtils;
 import com.github.luglimaccaferri.qbic.utils.RandomString;
+import com.google.gson.JsonObject;
 import nl.vv32.rcon.Rcon;
 import spark.Route;
 import java.io.BufferedOutputStream;
@@ -67,9 +68,10 @@ public class ServerController {
 
         try{
 
+            JsonObject body = req.attribute("parsed-body");
             String server_id = req.params(":id"),
                     path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
-            boolean is_dir = Boolean.parseBoolean(req.queryParams("is-directory"));
+            boolean is_dir = Boolean.parseBoolean(body.get("is-directory").getAsString());
 
             Server server = Server.find(server_id);
             User user = req.attribute("user");
@@ -98,9 +100,10 @@ public class ServerController {
 
         try{
 
+            JsonObject body = req.attribute("parsed-body");
             String server_id = req.params(":id"),
                     path = new String(Base64.getDecoder().decode(req.params(":path"))).trim();
-            String file_contents = req.queryParams("file-contents");
+            String file_contents = body.get("file-contents").getAsString();
             Server server = Server.find(server_id);
             User user = req.attribute("user");
 
@@ -131,9 +134,10 @@ public class ServerController {
     public static Route sendCommand = (req, res) -> {
 
         try{
+            JsonObject body = req.attribute("parsed-body");
 
             String server_id = req.params(":id"),
-                    command = req.queryParams("command");
+                    command = body.get("command").getAsString();
             User user = req.attribute("user");
 
             Server server = Server.find(server_id);
@@ -251,11 +255,13 @@ public class ServerController {
     public static Route create = (req, res) -> {
 
         try{
+            JsonObject body = req.attribute("parsed-body");
             User user = req.attribute("user");
-            String jar_path = req.queryParams("jar_path"),
-                    query_port = req.queryParams("query-port"),
-                    rcon_port = req.queryParams("rcon-port"),
-                    xmx = req.queryParams("xmx"), xms = req.queryParams("xms"), server_port = req.queryParams("server-port");
+            String jar_path = body.get("jar_path").getAsString(),
+                    name = body.get("name").getAsString(),
+                    query_port = body.get("query-port").getAsString(),
+                    rcon_port = body.get("rcon-port").getAsString(),
+                    xmx = body.get("xmx").getAsString(), xms = body.get("xms").getAsString(), server_port = body.get("server-port").getAsString();
 
             if(xmx == null) xmx = "1G";
             if(xms == null) xms = "1G";
@@ -264,7 +270,7 @@ public class ServerController {
 
             Server server = new Server(
                     RandomString.generateAlphanumeric(32),
-                    req.queryParams("name"),
+                    name,
                     jar_path,
                     user.getUUID().toString(),
                     user.getUsername(),
