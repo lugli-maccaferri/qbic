@@ -42,8 +42,6 @@ public class ProtectedRoute extends RouteDecorator {
     protected Route before() {
         return (req, res) -> {
 
-            JsonObject body = req.attribute("parsed-body");
-
             if(this.requiresAuth){
 
                 String authHeader = req.headers("authorization");
@@ -58,6 +56,7 @@ public class ProtectedRoute extends RouteDecorator {
 
             if(req.requestMethod().equals("POST") &&  this.requiredParams.length > 0){
 
+                JsonObject body = req.attribute("parsed-body");
                 ArrayList<String> missingParameters = new ArrayList<String>();
                 Arrays.stream(this.requiredParams).forEach(param -> {
                     String p = body.get(param).getAsString();
