@@ -55,8 +55,6 @@ public class QbicQueryResponse {
         String[] kv = sections[0].split("\0");
         String[] p = sections[1].split("\0");
 
-        System.out.println(Arrays.toString(kv));
-
         motd = kv[3];
         gametype = kv[5];
         game_id = kv[7];

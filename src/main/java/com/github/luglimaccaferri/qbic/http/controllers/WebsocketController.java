@@ -1,5 +1,4 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
-
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import com.github.luglimaccaferri.qbic.data.models.misc.User;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;

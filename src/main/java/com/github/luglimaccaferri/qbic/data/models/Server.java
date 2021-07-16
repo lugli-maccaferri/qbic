@@ -107,7 +107,7 @@ public class Server {
     public int getRconPort(){ return rcon_port; }
     public int getQueryPort() { return query_port; }
     public String getOwnerName() { return owner_name; }
-    public boolean isRunning(){ return status == Status.RUNNING; }
+    public boolean isRunning(){ return status == Status.RUNNING || status == Status.STARTING_UP; }
     public static ArrayList<Server> getRunningServers(){ return (ArrayList<Server>) started_servers.values().parallelStream().collect(Collectors.toList()); }
     public synchronized static Server getStarted(String server_id) { return started_servers.get(server_id); }
     public synchronized static Server getCreated(String server_id) { return created_servers.get(server_id); }
@@ -119,6 +119,32 @@ public class Server {
         created_servers.forEach((id, server) -> servers.add(server.toMap()));
 
         return servers;
+
+    }
+    public static void queueRemove(String server_id){
+        started_servers.remove(server_id);
+        created_servers.remove(server_id);
+    }
+    public synchronized static void delete(String server_id) throws SQLException, HTTPError {
+
+        Connection conn = Sqlite.getConnection();
+
+        try{
+
+            PreparedStatement s = conn.prepareStatement("DELETE FROM servers WHERE id = ?");
+            s.setString(1, server_id);
+            s.execute();
+            queueRemove(server_id);
+            conn.commit();
+
+        }catch(Exception e){
+
+            e.printStackTrace();
+            conn.rollback();
+
+            throw HTTPError.GENERIC_ERROR;
+
+        }
 
     }
     public synchronized File getMainDirectory(){
@@ -172,8 +198,14 @@ public class Server {
     }
     public synchronized static int getCreatedSize(){ return created_servers.size(); }
     public synchronized static int getStartedSize(){ return started_servers.size(); }
-    public synchronized void addListener(Session session){ this.sessions.add(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
-    public synchronized void removeListener(Session session){ this.sessions.remove(session); System.out.printf("server %s has %d listeners%n", id, sessions.size()); }
+    public synchronized void addListener(Session session){
+        this.sessions.add(session);
+        System.out.printf("server %s has %d listeners%n", id, sessions.size());
+    }
+    public synchronized void removeListener(Session session){
+        this.sessions.remove(session);
+        System.out.printf("server %s has %d listeners%n", id, sessions.size());
+    }
 
     public synchronized static void addCreated(Server server){
 
@@ -192,63 +224,6 @@ public class Server {
         if(created_servers.contains(server)) created_servers.remove(server.getServerId());
 
     }
-
-
-
-    /*private void startServer() throws IOException {
-
-        synchronized (this){
-
-            if(this.status == Status.RUNNING || this.status == Status.STARTING_UP)
-                return;
-
-            this.status = Status.STARTING_UP;
-            System.out.printf("starting %s%n", this.name);
-
-            this.process_builder = new ProcessBuilder("java", "-Xmx" + xmx, "-Xms" + xms, "-jar", "server.jar", "nogui");
-            this.process_builder.redirectErrorStream(true);
-            this.process_builder.directory(Path.of(this.main_path).toFile());
-
-            this.process = this.process_builder.start();
-            this.reader = new BufferedReader(
-                    new InputStreamReader(
-                            this.process.getInputStream()
-                    )
-            );
-
-            this.status = Status.RUNNING;
-            addStarted(this);
-
-        }
-
-        System.out.printf("started server %s (pid: %d)%n", this.name, this.process.pid());
-        String line;
-
-        try{
-            while((line = this.reader.readLine()) != null){
-                if(this.sessions.size() > 0){
-                    final String s = line;
-                    this.sessions.forEach(session -> {
-                        try {
-                            session.getRemote().sendString(s);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-        }catch(IOException e){
-            System.out.format("closed console stream for %s\n", id);
-        }finally{
-            // qualcosa è successo (processo fermato o in error)
-            started_servers.remove(getServerId());
-            created_servers.put(getServerId(), this);
-            this.sessions.forEach(Session::close);
-
-            System.out.format("server %s stopped!\n", getServerName());
-        }
-
-    }*/
 
     public HashMap<String, String> toMap(){
 

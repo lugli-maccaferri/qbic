@@ -24,9 +24,9 @@ public class Router {
         before((req, res) -> {
 
             try{
-                res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // debug da togliere in prod
+                /*res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // debug da togliere in prod
                 res.header("Access-Control-Allow-Headers", "*"); // debug
-                res.header("Access-Control-Allow-Credentials", "true");
+                res.header("Access-Control-Allow-Credentials", "true");*/
                 res.type("application/json");
                 req.attribute("parsed-body", JsonParser.parseString(req.body()));
 
@@ -77,10 +77,11 @@ public class Router {
             route(new String[]{"name", "query-port", "server-port", "rcon-port"}, true).post("/create", ServerController.create);
             route(true).post("/start/:id", ServerController.start);
             route(true).post("/stop/:id", ServerController.stop);
+            route(true).delete("/:id", ServerController.deleteServer);
             path("/files", () -> {
                 route(true).get("/:id", ServerController.mainDirectory);
                 route(true).get("/:id/:path", ServerController.files);
-                route(true).delete("/:id/:path", ServerController.deleteFile);
+                route(new String[]{"file-contents"}, true).delete("/:id/:path", ServerController.deleteFile);
                 route(true).post("/edit/:id/:path", ServerController.editFile);
                 route(true).post("/create/:id/:path", ServerController.createFile);
             });

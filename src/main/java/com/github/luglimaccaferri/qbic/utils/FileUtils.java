@@ -11,11 +11,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class FileUtils {
 
     public static String[] PRINTABLE_MIMETYPES = { "application/json", "text/plain", "application/x-yaml", "text/yaml", "text/x-log"};
+
+    public static void deleteDirectory(Path path) throws IOException {
+
+        Files
+                .walk(path)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+
+    }
 
     public static void resolveAndCreate(Server server, String path, boolean is_dir) throws IOException {
 

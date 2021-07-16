@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.luglimaccaferri.qbic.data.models.misc.User;
 import com.github.luglimaccaferri.qbic.http.Router;
 import com.github.luglimaccaferri.qbic.utils.Security;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import spark.Route;
 import xyz.luan.spark.decorator.RouteDecorator;
@@ -57,10 +58,17 @@ public class ProtectedRoute extends RouteDecorator {
             if(req.requestMethod().equals("POST") &&  this.requiredParams.length > 0){
 
                 JsonObject body = req.attribute("parsed-body");
+                if(body == null) return HTTPError.BAD_REQUEST.toResponse(res);
+
                 ArrayList<String> missingParameters = new ArrayList<String>();
                 Arrays.stream(this.requiredParams).forEach(param -> {
-                    String p = body.get(param).getAsString();
-                    if(p == null || p.equals("")) missingParameters.add(param);
+                    JsonElement p = body.get(param);
+                    if(p == null) {
+                        missingParameters.add(param);
+                        return;
+                    }
+                    String str_p = p.getAsString();
+                    if(str_p.equals("")) missingParameters.add(param);
                 });
 
                 if(missingParameters.size() > 0){
