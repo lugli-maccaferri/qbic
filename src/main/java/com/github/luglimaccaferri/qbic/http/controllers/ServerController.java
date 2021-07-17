@@ -339,7 +339,7 @@ public class ServerController {
             );
 
             server.create();
-            Files.createDirectories(Path.of(Core.STATIC_PATH + "/" + server.getServerId()));
+            Files.createDirectories(Path.of(Core.STATIC_PATH + "/icons/" + server.getServerId()));
             FileUtils.downloadResourceToServer(str_server_icon, server, "server-icon.png", Core.STATIC_PATH + "/icons/" + server.getServerId() + "/server-icon.png");
 
             return new Ok().put("server", server.toMap()).toResponse(res);
