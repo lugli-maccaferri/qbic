@@ -20,13 +20,12 @@ public class Router {
     public void ignite(){
 
         webSocket("/console-stream", WebsocketController.class);
+        staticFiles.externalLocation(Core.STATIC_PATH);
 
         before((req, res) -> {
 
             try{
-                /*res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // debug da togliere in prod
-                res.header("Access-Control-Allow-Headers", "*"); // debug
-                res.header("Access-Control-Allow-Credentials", "true");*/
+
                 res.type("application/json");
                 req.attribute("parsed-body", JsonParser.parseString(req.body()));
 

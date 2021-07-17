@@ -44,6 +44,7 @@ public class Server {
     private final int server_port;
 
     private static final String DEFAULT_PATH = "https://static.macca.cloud/qbic/jars/spigot.jar";
+    public static final String DEFAULT_SERVER_ICON = "https://static.macca.cloud/qbic/icons/server-icon.png";
     private ServerRunner runner;
     private final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<Session>();
 
@@ -283,44 +284,7 @@ public class Server {
 
     private void downloadJar(){
 
-        System.out.printf("downloading %s...%n", jar_path);
-
-        CompletableFuture.runAsync(() -> { // basta, ci sono già troppi thread in questa applicazione
-
-            Request request = new Request.Builder().url(jar_path).build();
-            try {
-
-                // magari mettiamo backpressure, perché per ora tutto il file scaricato viene caricato in RAM
-
-                Instant start = Instant.now();
-                Response response = Core.getHttpClient().newCall(request).execute();
-                ResponseBody body = response.body();
-                long len = Objects.requireNonNull(body).contentLength();
-                BufferedSource src = body.source();
-                File file = new File(main_path + "/server.jar");
-                BufferedSink sink = Okio.buffer(Okio.sink(file));
-                long read = 0, current_read_bytes = 0;
-
-                while(
-                        (read = src.read(sink.getBuffer(), 2048)) != -1
-                ){
-                    current_read_bytes += read;
-                }
-
-                System.out.printf("wrote %d bytes (%ds)!%n", current_read_bytes, Duration.between(start, Instant.now()).toMillis() / 1000);
-                sink.writeAll(src);
-                sink.flush();
-                sink.close();
-                response.close();
-
-            } catch (IOException e) {
-
-                // e.printStackTrace();
-                Core.logger.warn("failed to download %s", jar_path);
-
-            }
-
-        });
+        FileUtils.downloadResourceToServer(jar_path, this, "server.jar");
 
     }
 

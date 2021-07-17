@@ -47,8 +47,6 @@ public class QbicQuery {
         int token = generateChallengeToken();
         byte[] bytes = new QbicQueryRequest(QbicQueryRequest.Type.FULL_STAT, token).toBytes();
 
-        System.out.println(Arrays.toString(bytes));
-
         return new QbicQueryResponse(send(bytes), true);
 
     }

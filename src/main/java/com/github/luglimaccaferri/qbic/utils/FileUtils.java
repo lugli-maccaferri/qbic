@@ -1,22 +1,90 @@
 package com.github.luglimaccaferri.qbic.utils;
 
+import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import com.github.luglimaccaferri.qbic.http.models.HTTPError;
 import com.github.luglimaccaferri.qbic.http.models.JSONResponse;
 import com.github.luglimaccaferri.qbic.http.models.Ok;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 import org.apache.tika.Tika;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 public class FileUtils {
 
     public static String[] PRINTABLE_MIMETYPES = { "application/json", "text/plain", "application/x-yaml", "text/yaml", "text/x-log"};
+
+    public static CompletableFuture<Void> downloadResourceToServer(String url, Server server, String resource_name, String copy_to){
+
+        return CompletableFuture.runAsync(() -> {
+
+            try {
+                downloadResourceToServer(url, server, resource_name).get();
+                Files.copy(Path.of(server.getMainDirectory() + "/" + resource_name), Path.of(copy_to));
+            } catch (InterruptedException | ExecutionException | IOException e) {
+                // e.printStackTrace();
+                if(e instanceof IOException) Core.logger.warn("failed to copy %s", resource_name);
+                else Core.logger.warn("failed to download %s", url);
+            }
+
+        });
+
+    }
+    public static CompletableFuture<Void> downloadResourceToServer(String url, Server server, String resource_name){
+
+        return CompletableFuture.runAsync(() -> {
+
+            System.out.printf("downloading %s...%n", url);
+            Request request = new Request.Builder().url(url).build();
+            try {
+
+                Instant start = Instant.now();
+                Response response = Core.getHttpClient().newCall(request).execute();
+                ResponseBody body = response.body();
+                long len = Objects.requireNonNull(body).contentLength();
+                BufferedSource src = body.source();
+                File file = new File(server.getMainDirectory() + "/" + resource_name);
+                BufferedSink sink = Okio.buffer(Okio.sink(file));
+                long read = 0, current_read_bytes = 0;
+
+                while(
+                        (read = src.read(sink.getBuffer(), 2048)) != -1
+                ){
+                    current_read_bytes += read;
+                }
+
+                System.out.printf("wrote %d bytes (%ds)!%n", current_read_bytes, Duration.between(start, Instant.now()).toMillis() / 1000);
+                sink.writeAll(src);
+                sink.flush();
+                sink.close();
+                response.close();
+
+            } catch (IOException e) {
+
+                // e.printStackTrace();
+                Core.logger.warn("failed to download %s", url);
+
+            }
+
+        });
+
+    }
 
     public static void deleteDirectory(Path path) throws IOException {
 

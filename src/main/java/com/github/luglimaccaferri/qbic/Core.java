@@ -44,6 +44,7 @@ public class Core {
     public static final String SQLITE_PATH = System.getProperty("user.dir") + "/qbic.db";
     public static final String SERVERS_PATH = System.getProperty("user.dir") + "/srv";
     public static final String JARS_PATH = System.getProperty("user.dir") + "/jars";
+    public static final String STATIC_PATH = System.getProperty("user.dir") + "/static";
     private static PublicKey PARENT_KEY;
     private static JWTVerifier verifier;
 
@@ -89,6 +90,9 @@ public class Core {
             Files.createDirectories(Path.of(SERVERS_PATH));
             // directory jar
             Files.createDirectories(Path.of(JARS_PATH));
+            // directory static
+            Files.createDirectories(Path.of(STATIC_PATH));
+            Files.createDirectories(Path.of(STATIC_PATH + "/icons"));
 
             if(!Files.exists(Path.of(CONFIG_PATH)))
                 Files.copy(

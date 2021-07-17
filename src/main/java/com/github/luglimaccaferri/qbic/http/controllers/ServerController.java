@@ -1,5 +1,6 @@
 package com.github.luglimaccaferri.qbic.http.controllers;
 
+import com.github.luglimaccaferri.qbic.Core;
 import com.github.luglimaccaferri.qbic.data.models.Server;
 import com.github.luglimaccaferri.qbic.data.models.misc.User;
 import com.github.luglimaccaferri.qbic.data.net.query.QbicQuery;
@@ -233,6 +234,7 @@ public class ServerController {
                     .put("players", response.getPlayers())
                     .put("plugins", response.getPlugins())
                     .put("version", response.getVersion())
+                    .put("server_icon", "/icons/" + server_id + "/server-icon.png")
                     .toResponse(res);
 
         }catch(Exception e){
@@ -313,12 +315,13 @@ public class ServerController {
                     query_port = body.get("query-port").getAsString(),
                     rcon_port = body.get("rcon-port").getAsString(),
                     server_port = body.get("server-port").getAsString();
-            JsonElement jar_path = body.get("jar-path"), xmx = body.get("xmx"), xms = body.get("xms");
-            String str_jar_path, str_xmx, str_xms;
+            JsonElement jar_path = body.get("jar-path"), xmx = body.get("xmx"), xms = body.get("xms"), server_icon = body.get("server-icon");
+            String str_jar_path, str_xmx, str_xms, str_server_icon;
 
             if(xmx == null) str_xmx = "1G"; else str_xmx = xmx.getAsString();
             if(xms == null) str_xms = "1G"; else str_xms = xms.getAsString();
             if(jar_path == null) str_jar_path = null; else str_jar_path = jar_path.getAsString();
+            if(server_icon == null) str_server_icon = Server.DEFAULT_SERVER_ICON; else str_server_icon = server_icon.getAsString();
 
             if(!(user.canEditFs() || user.isAdmin())) return HTTPError.FORBIDDEN.toResponse(res);
 
@@ -336,12 +339,14 @@ public class ServerController {
             );
 
             server.create();
+            Files.createDirectories(Path.of(Core.STATIC_PATH + "/" + server.getServerId()));
+            FileUtils.downloadResourceToServer(str_server_icon, server, "server-icon.png", Core.STATIC_PATH + "/icons/" + server.getServerId() + "/server-icon.png");
 
             return new Ok().put("server", server.toMap()).toResponse(res);
 
         }catch(Exception e){
 
-            System.out.println(e.toString());
+            e.printStackTrace();
 
             return HTTPError.GENERIC_ERROR.toResponse(res);
 
