@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public class FileUtils {
 
-    public static String[] PRINTABLE_MIMETYPES = { "application/json", "text/plain", "application/x-yaml", "text/yaml", "text/x-log"};
+    public static String[] PRINTABLE_MIMETYPES = { "text/x-java-properties", "application/json", "text/plain", "application/x-yaml", "text/yaml", "text/x-log"};
 
     public static CompletableFuture<Void> downloadResourceToServer(String url, Server server, String resource_name, String copy_to){
 
